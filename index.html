@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>발소리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   1. 토큰 — 차가운 밤 팔레트 (기존 "따뜻한 정원"·"불씨 캠프" 계열과 의도적으로 다른 톤)
+   ============================================================ */
+:root{
+  --dg-bg: #12100E;
+  --dg-bg-alt: #0B0A08;
+  --dg-panel: #1C1815;
+  --dg-panel-2: #241F1A;
+  --dg-border: #34302B;
+  --dg-border-soft: #262220;
+  --dg-text: #F2ECE4;
+  --dg-text-muted: #9C948A;
+  --dg-text-faint: #6B645C;
+
+  --dg-accent: #C43D00;        /* 브랜드 오렌지 — 아이콘/보더/큰 텍스트 전용 (다크 배경 대비 ~3.4:1) */
+  --dg-accent-strong: #FF6A3D; /* 채워진 버튼용 밝은 변형 (어두운 글자와 대비 ~6.3:1, AA 통과) */
+  --dg-safe: #7FB8A6;          /* 차가운 달빛 톤 — 안전/평온 상태 시그니처 컬러 */
+  --dg-safe-strong: #B7D9CE;
+  --dg-danger: #E2472B;        /* 위험 임박 시에만 사용하는 경보색 (정적인 브랜드 오렌지와 구분) */
+
+  --dg-radius-sm: 6px;
+  --dg-radius-md: 10px;
+  --dg-radius-lg: 18px;
+  --dg-radius-pill: 999px;
+
+  --dg-shadow-panel: 0 16px 40px rgba(0,0,0,.5);
+  --dg-shadow-inset: inset 0 1px 0 rgba(255,255,255,.03);
+
+  --dg-font-display: 'Song Myung', 'Noto Serif KR', serif;
+  --dg-font-ui: Pretendard, -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  --dg-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+  --dg-motion-fast: 120ms;
+  --dg-motion-med: 320ms;
+  --dg-motion-slow: 700ms;
+
+  /* 실제 배경 아트: footsteps-gameplay 이미지 (야간 숲길 + 발광 발자국) */
+  --dg-scene-desktop: url('./assets/bg.webp');
+  --dg-scene-mobile: url('./assets/bg.webp');
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root{ --dg-motion-fast:0ms; --dg-motion-med:0ms; --dg-motion-slow:0ms; }
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; height:100%; }
+body{
+  background:
+    linear-gradient(rgba(9,7,6,.58), rgba(9,7,6,.8) 55%, var(--dg-bg) 92%),
+    radial-gradient(120% 90% at 50% -10%, #201A16 0%, transparent 60%),
+    var(--dg-scene-desktop);
+  background-size: cover, cover, cover;
+  background-position: center, center, center 30%;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed;
+  color:var(--dg-text);
+  font-family:var(--dg-font-ui);
+  min-height:100%;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+@media (max-width:640px){
+  body{
+    background:
+      linear-gradient(rgba(9,7,6,.62), rgba(9,7,6,.85) 50%, var(--dg-bg) 90%),
+      radial-gradient(140% 70% at 50% -5%, #201A16 0%, transparent 60%),
+      var(--dg-scene-mobile);
+    background-size: cover, cover, cover;
+    background-position: center, center, center 22%;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-attachment: scroll, scroll, scroll;
+  }
+}
+
+button{ font-family:inherit; }
+:focus{ outline:none; }
+:focus-visible{
+  outline: 3px solid var(--dg-safe-strong);
+  outline-offset: 2px;
+  border-radius: var(--dg-radius-sm);
+}
+
+.visually-hidden{
+  position:absolute !important; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+.app{
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 40px);
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.screen{ display:none; }
+.screen.is-active{ display:flex; flex-direction:column; gap:20px; animation: dg-fade var(--dg-motion-med) ease both; }
+@keyframes dg-fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+/* ============================================================
+   2. 시그니처 — 발자국 트레일 모티프
+   ============================================================ */
+.footprint-trail{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 22px;
+  margin: 4px 0 8px;
+  opacity:.8;
+}
+.footprint-trail svg{ width:22px; height:30px; opacity:.55; }
+.footprint-trail svg:nth-child(2n){ transform:translateY(10px); }
+.footprint-trail svg:nth-child(2n) + svg{ transform:translateY(0); }
+.footprint{ fill: var(--dg-accent); }
+
+/* ============================================================
+   3. 타이틀 화면
+   ============================================================ */
+.title-hero{
+  text-align:center;
+  padding: clamp(28px, 8vw, 56px) 20px clamp(12px, 4vw, 24px);
+}
+.title-eyebrow{
+  font-family: var(--dg-font-mono);
+  font-size: 12px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--dg-text-faint);
+  margin: 0 0 14px;
+}
+.title-name{
+  font-family: var(--dg-font-display);
+  font-size: clamp(44px, 12vw, 76px);
+  line-height:1.05;
+  margin: 0;
+  color: var(--dg-text);
+  text-shadow: 0 0 28px rgba(196,61,0,.25);
+  letter-spacing: .02em;
+}
+.title-sub{
+  font-size: 15px;
+  color: var(--dg-text-muted);
+  max-width: 46ch;
+  margin: 14px auto 0;
+  line-height:1.6;
+}
+
+.panel{
+  background: var(--dg-panel);
+  border: 1px solid var(--dg-border);
+  border-radius: var(--dg-radius-lg);
+  box-shadow: var(--dg-shadow-panel), var(--dg-shadow-inset);
+  padding: clamp(16px, 4vw, 28px);
+}
+
+.section-label{
+  font-family: var(--dg-font-mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--dg-text-faint);
+  margin: 0 0 12px;
+}
+
+.choice-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap: 10px;
+}
+.choice-btn{
+  background: var(--dg-panel-2);
+  border: 1.5px solid var(--dg-border);
+  border-radius: var(--dg-radius-md);
+  color: var(--dg-text);
+  padding: 14px 12px;
+  min-height: 48px;
+  cursor:pointer;
+  font-size: 14.5px;
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  transition: border-color var(--dg-motion-fast), background var(--dg-motion-fast), transform var(--dg-motion-fast);
+}
+.choice-btn strong{ font-size:15px; }
+.choice-btn span{ color:var(--dg-text-muted); font-size:12.5px; }
+.choice-btn:hover{ border-color: var(--dg-accent); background:#2A211B; }
+.choice-btn:active{ transform: scale(.98); }
+.choice-btn.is-selected{
+  border-color: var(--dg-accent-strong);
+  background: #2E1E15;
+  box-shadow: 0 0 0 1px var(--dg-accent-strong) inset;
+}
+
+.btn{
+  appearance:none;
+  border:none;
+  border-radius: var(--dg-radius-pill);
+  padding: 14px 26px;
+  min-height: 48px;
+  font-size: 15px;
+  font-weight:600;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition: transform var(--dg-motion-fast), filter var(--dg-motion-fast);
+}
+.btn:active{ transform: scale(.97); }
+.btn-primary{ background: var(--dg-accent-strong); color:#1C1815; }
+.btn-primary:hover{ filter:brightness(1.06); }
+.btn-ghost{ background: transparent; color: var(--dg-text); border:1.5px solid var(--dg-border); }
+.btn-ghost:hover{ border-color: var(--dg-accent); }
+.btn-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+.controls-legend{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+  gap:10px;
+  margin-top:4px;
+}
+.key-chip{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background: var(--dg-panel-2);
+  border:1px solid var(--dg-border-soft);
+  border-radius: var(--dg-radius-md);
+  padding: 10px 12px;
+  font-size:13px;
+  color: var(--dg-text-muted);
+}
+.key-chip b{
+  font-family: var(--dg-font-mono);
+  color: var(--dg-text);
+  background: var(--dg-bg-alt);
+  border:1px solid var(--dg-border);
+  border-radius: var(--dg-radius-sm);
+  padding: 3px 7px;
+  font-size:12px;
+  min-width: 30px;
+  text-align:center;
+}
+
+/* ============================================================
+   4. 게임 화면 — HUD + 촉각 미리보기 + 캡션
+   ============================================================ */
+.game-layout{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width:760px){
+  .game-layout{ grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr); align-items:start; }
+}
+
+.hud-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.hud-stat{
+  font-family: var(--dg-font-mono);
+  font-size: 13px;
+  color: var(--dg-text-muted);
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+}
+.hud-stat b{ font-size:20px; color:var(--dg-text); font-weight:600; }
+
+.tension-track{
+  height:8px;
+  border-radius: var(--dg-radius-pill);
+  background: var(--dg-bg-alt);
+  border:1px solid var(--dg-border-soft);
+  overflow:hidden;
+  flex: 1 1 140px;
+  min-width: 100px;
+}
+.tension-fill{
+  height:100%;
+  width:8%;
+  background: linear-gradient(90deg, var(--dg-safe), var(--dg-accent-strong) 60%, var(--dg-danger));
+  transition: width var(--dg-motion-med) ease;
+  border-radius: inherit;
+}
+
+.tactile-preview{
+  --cols: 6;
+  --rows: 5;
+  aspect-ratio: 6 / 5;
+  display:grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
+  gap: 4px;
+  background: var(--dg-bg-alt);
+  border: 1px solid var(--dg-border);
+  border-radius: var(--dg-radius-lg);
+  padding: 10px;
+  box-shadow: var(--dg-shadow-inset);
+}
+.tile{
+  position:relative;
+  border-radius: var(--dg-radius-sm);
+  background: #1A1613;
+  border: 1px solid #26211D;
+  transition: background var(--dg-motion-fast), border-color var(--dg-motion-fast), box-shadow var(--dg-motion-fast);
+}
+.tile.is-bush{
+  background: repeating-linear-gradient(135deg, #1D2A21 0 4px, #19251D 4px 8px);
+  border-color: rgba(127,184,166,.35);
+}
+.tile.is-bush::after{
+  content:"";
+  position:absolute; inset:6px;
+  border-radius:4px;
+  border:1px dashed rgba(127,184,166,.5);
+}
+.tile.is-player{
+  background: var(--dg-safe);
+  box-shadow: 0 0 0 2px var(--dg-panel), 0 0 14px rgba(127,184,166,.7);
+}
+.tile.is-player-bush{
+  background: var(--dg-safe-strong);
+  box-shadow: 0 0 0 2px var(--dg-panel), 0 0 18px rgba(183,217,206,.6);
+}
+.tile.is-monster-flash{
+  background: var(--dg-danger);
+  border-color: var(--dg-danger);
+  box-shadow: 0 0 16px rgba(226,71,43,.85);
+}
+
+.caption-box{
+  min-height: 56px;
+  border-radius: var(--dg-radius-md);
+  border:1px solid var(--dg-border-soft);
+  background: var(--dg-panel-2);
+  padding: 12px 14px;
+  font-size: 14.5px;
+  line-height:1.55;
+  color: var(--dg-text);
+}
+.caption-box .caption-eyebrow{
+  display:block;
+  font-family: var(--dg-font-mono);
+  font-size:10.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color: var(--dg-text-faint);
+  margin-bottom:4px;
+}
+
+.dpad{
+  display:grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap:6px;
+  justify-content:center;
+  margin: 6px auto 0;
+}
+.dpad button{
+  background: var(--dg-panel-2);
+  border:1.5px solid var(--dg-border);
+  border-radius: var(--dg-radius-md);
+  color: var(--dg-text);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.dpad button:hover{ border-color: var(--dg-accent); }
+.dpad button:active{ transform: scale(.95); }
+.dpad .dpad-up{ grid-column:2; grid-row:1; }
+.dpad .dpad-left{ grid-column:1; grid-row:2; }
+.dpad .dpad-stay{ grid-column:2; grid-row:2; background:var(--dg-bg-alt); }
+.dpad .dpad-right{ grid-column:3; grid-row:2; }
+.dpad .dpad-down{ grid-column:2; grid-row:3; }
+
+.icon{ width:20px; height:20px; stroke:currentColor; stroke-width:1.8; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+.side-panel{ display:flex; flex-direction:column; gap:14px; }
+
+/* ============================================================
+   5. 오버레이 (일시정지 / 결과)
+   ============================================================ */
+.overlay{
+  position:fixed; inset:0;
+  background: rgba(9,7,6,.72);
+  backdrop-filter: blur(2px);
+  display:flex; align-items:center; justify-content:center;
+  padding: 20px;
+  z-index: 50;
+}
+.overlay[hidden]{ display:none; }
+.overlay-card{
+  width:min(420px, 100%);
+  text-align:center;
+}
+.overlay-title{
+  font-family: var(--dg-font-display);
+  font-size: 30px;
+  margin: 0 0 6px;
+}
+.overlay-sub{ color:var(--dg-text-muted); font-size:14px; margin:0 0 18px; }
+.result-stats{
+  display:flex;
+  justify-content:center;
+  gap: 22px;
+  margin: 10px 0 20px;
+}
+.result-stat b{
+  display:block;
+  font-family: var(--dg-font-mono);
+  font-size: 26px;
+  color: var(--dg-text);
+}
+.result-stat span{ font-size:12px; color:var(--dg-text-muted); }
+
+@media (max-width:520px){
+  .dpad{ grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px); }
+}
+
+/* 핀 미리보기 (dot-games-host 표준: 실제 60x40 핀 출력 미리보기) */
+.pinwrap{
+  position:fixed; right:12px; bottom:12px; z-index:60;
+  background: var(--dg-panel); border:1px solid var(--dg-border);
+  border-radius: var(--dg-radius-md); padding:8px;
+  box-shadow: var(--dg-shadow-panel);
+  display:none;
+}
+.pinwrap.show{ display:block; }
+.pinwrap canvas{ width:150px; display:block; border-radius:6px; background:#0B0A08; }
+.pinwrap .cap{ font-family:var(--dg-font-mono); font-size:10px; color:var(--dg-text-faint); text-align:center; margin-top:4px; }
+
+/* 임베드(?embed=1) 모드: 실제 기기로 보고 있으므로 화면 속 핀 미리보기는 숨김 */
+body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============================================================
+       타이틀 화면
+       ============================================================ -->
+  <section class="screen is-active" id="screen-title" aria-label="발소리 타이틀 화면">
+    <div class="title-hero">
+      <p class="title-eyebrow">숨죽인 밤 · 촉각 추격 게임</p>
+      <h1 class="title-name">발소리</h1>
+      <div class="footprint-trail" aria-hidden="true">
+        <svg viewBox="0 0 22 30"><path class="footprint" d="M11 2c-3 0-4 3-4 6s1 5 4 5 4-2 4-5-1-6-4-6zM6 12c-2.4 0-4 2.6-4 6.5S3.6 26 6.4 26c2.3 0 3.6-2 3.6-5.6C10 16 8.4 12 6 12z"/></svg>
+        <svg viewBox="0 0 22 30"><path class="footprint" d="M11 2c-3 0-4 3-4 6s1 5 4 5 4-2 4-5-1-6-4-6zM16 12c2.4 0 4 2.6 4 6.5S18.4 26 15.6 26c-2.3 0-3.6-2-3.6-5.6 0-4.4 1.6-8.4 4-8.4z"/></svg>
+        <svg viewBox="0 0 22 30"><path class="footprint" d="M11 2c-3 0-4 3-4 6s1 5 4 5 4-2 4-5-1-6-4-6zM6 12c-2.4 0-4 2.6-4 6.5S3.6 26 6.4 26c2.3 0 3.6-2 3.6-5.6C10 16 8.4 12 6 12z"/></svg>
+      </div>
+      <p class="title-sub">숨을 죽이고, 손끝으로 다가오는 발소리를 쫓으세요. 움직이면 들키고, 가만히 있으면 지쳐가요.</p>
+    </div>
+
+    <div class="panel">
+      <p class="section-label">난이도 선택</p>
+      <div class="choice-grid" id="difficulty-grid" role="group" aria-label="난이도 선택">
+        <button class="choice-btn" data-rounds="0" type="button"><strong>연습</strong><span>시간 제한 없음 · AI 느림</span></button>
+        <button class="choice-btn is-selected" data-rounds="10" type="button"><strong>10라운드</strong><span>짧게 한 판</span></button>
+        <button class="choice-btn" data-rounds="15" type="button"><strong>15라운드</strong><span>기본</span></button>
+        <button class="choice-btn" data-rounds="20" type="button"><strong>20라운드</strong><span>새벽까지 버티기</span></button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="section-label">조작 · 키보드</p>
+      <div class="controls-legend">
+        <div class="key-chip"><b>↑↓←→</b> 이동 (소리가 나요)</div>
+        <div class="key-chip"><b>S</b> 가만히 있기</div>
+        <div class="key-chip"><b>R</b> 안내 다시 듣기</div>
+        <div class="key-chip"><b>P</b> 일시정지</div>
+        <div class="key-chip"><b>H</b> 도움말</div>
+      </div>
+      <p class="section-label" style="margin-top:14px;">조작 · 닷패드</p>
+      <div class="controls-legend">
+        <div class="key-chip"><b>F1~F4</b> 상/하/좌/우 이동</div>
+        <div class="key-chip"><b>Pan 전체</b> 가만히 있기</div>
+        <div class="key-chip"><b>Pan 좌</b> 안내 다시 듣기</div>
+        <div class="key-chip"><b>Pan 우</b> 도움말</div>
+        <div class="key-chip"><b>LPF1</b> 일시정지</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-start" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        시작하기
+      </button>
+      <button class="btn btn-ghost" id="btn-howto" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="17" x2="12" y2="11"/><circle cx="12" cy="7.5" r=".6" fill="currentColor" stroke="none"/></svg>
+        규칙 듣기
+      </button>
+      <button class="btn btn-ghost" id="btn-dotpad-title" type="button" aria-pressed="false">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M7 8l10 8l-5 4v-16l5 4l-10 8"/></svg>
+        <span class="dp-label">닷패드 연결</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       게임 화면
+       ============================================================ -->
+  <section class="screen" id="screen-game" aria-label="발소리 게임 화면">
+    <div class="hud-row">
+      <div class="hud-stat">라운드 <b id="hud-round">1</b><span id="hud-round-total">/10</span></div>
+      <div class="tension-track" role="img" aria-label="위험도">
+        <div class="tension-fill" id="tension-fill"></div>
+      </div>
+      <div class="hud-stat">최고 <b id="hud-best">0</b></div>
+    </div>
+
+    <div class="game-layout">
+      <div>
+        <div class="tactile-preview" id="tactile-preview" role="img" aria-label="촉각 미리보기: 내 위치와 방금 느껴진 발소리 위치"></div>
+        <div class="dpad" aria-hidden="true">
+          <button class="dpad-up" data-dir="up" type="button" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+          <button class="dpad-left" data-dir="left" type="button" aria-label="왼쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 5 5 12 12 19"/></svg></button>
+          <button class="dpad-stay" data-action="stay" type="button" aria-label="가만히 있기"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/></svg></button>
+          <button class="dpad-right" data-dir="right" type="button" aria-label="오른쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+          <button class="dpad-down" data-dir="down" type="button" aria-label="아래로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></button>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div class="caption-box" id="caption-box" role="status" aria-live="polite">
+          <span class="caption-eyebrow">안내</span>
+          <span id="caption-text">시작하면 여기에 상황이 안내돼요.</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-repeat" type="button">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+            다시 듣기
+          </button>
+          <button class="btn btn-ghost" id="btn-pause" type="button">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/></svg>
+            일시정지
+          </button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-dotpad-game" type="button" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M7 8l10 8l-5 4v-16l5 4l-10 8"/></svg>
+            <span class="dp-label">닷패드 연결</span>
+          </button>
+          <button class="btn btn-ghost" id="btn-pin-toggle" type="button" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M5 5h.01M12 5h.01M19 5h.01M5 12h.01M12 12h.01M19 12h.01M5 19h.01M12 19h.01M19 19h.01"/></svg>
+            핀 미리보기
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="visually-hidden" id="live-alert" role="alert" aria-live="assertive"></div>
+</div>
+
+<!-- ============================================================
+     오버레이: 일시정지
+     ============================================================ -->
+<div class="overlay" id="overlay-pause" hidden>
+  <div class="panel overlay-card">
+    <h2 class="overlay-title">일시정지</h2>
+    <p class="overlay-sub">숨은 여전히 죽이고 있어요. 준비되면 이어하기.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-resume" type="button">이어하기</button>
+      <button class="btn btn-ghost" id="btn-quit-title" type="button">그만하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     오버레이: 결과
+     ============================================================ -->
+<div class="overlay" id="overlay-results" hidden>
+  <div class="panel overlay-card">
+    <div class="footprint-trail" aria-hidden="true">
+      <svg viewBox="0 0 22 30"><path class="footprint" d="M11 2c-3 0-4 3-4 6s1 5 4 5 4-2 4-5-1-6-4-6zM6 12c-2.4 0-4 2.6-4 6.5S3.6 26 6.4 26c2.3 0 3.6-2 3.6-5.6C10 16 8.4 12 6 12z"/></svg>
+    </div>
+    <h2 class="overlay-title" id="result-title">들켰어요…</h2>
+    <p class="overlay-sub" id="result-sub">그래도 꽤 오래 버텼어요.</p>
+    <div class="result-stats">
+      <div class="result-stat"><b id="result-rounds">0</b><span>생존 라운드</span></div>
+      <div class="result-stat"><b id="result-best">0</b><span>최고 기록</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-retry" type="button">다시 시도</button>
+      <button class="btn btn-ghost" id="btn-to-title" type="button">타이틀로</button>
+    </div>
+  </div>
+</div>
+
+<div class="pinwrap" id="pinwrap">
+  <canvas id="pin" aria-hidden="true"></canvas>
+  <div class="cap">실제 핀 출력 (60×40)</div>
+</div>
+
+<script src="/tts.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   0. 상수 / 순수 유틸
+   ============================================================ */
+var COLS = 6, ROWS = 5;           // 논리 타일 그리드
+var PIN_W = 60, PIN_H = 40;       // 닷패드 물리 핀 해상도
+var TILE_W = PIN_W / COLS;        // 10
+var TILE_H = PIN_H / ROWS;        // 8
+var CELL_W = 2, CELL_H = 4;       // DTMS 셀 단위 (2x4 핀 블록)
+var MAX_DIST = (ROWS - 1) + (COLS - 1); // 9, 대각 이동 없는 맨해튼 거리 최대값
+
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+function dist(a, b){ return Math.abs(a.row - b.row) + Math.abs(a.col - b.col); }
+function sameTile(a, b){ return a.row === b.row && a.col === b.col; }
+function inBounds(t){ return t.row >= 0 && t.row < ROWS && t.col >= 0 && t.col < COLS; }
+function neighbors(t){
+  var out = [];
+  [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){
+    var n = { row: t.row + d[0], col: t.col + d[1] };
+    if (inBounds(n)) out.push(n);
+  });
+  return out;
+}
+function pickRandom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* ============================================================
+   1. DTMS 인코딩 — dotBit = lx*4+ly, 60x40 → 300바이트/600hex
+   ============================================================ */
+function encodePins(bitmap /* 40행 x 60열, 0/1 */){
+  var bytes = new Uint8Array((PIN_W / CELL_W) * (PIN_H / CELL_H)); // 30 x 10 = 300
+  var cellsX = PIN_W / CELL_W, cellsY = PIN_H / CELL_H;
+  for (var cy = 0; cy < cellsY; cy++){
+    for (var cx = 0; cx < cellsX; cx++){
+      var b = 0;
+      for (var ly = 0; ly < CELL_H; ly++){
+        for (var lx = 0; lx < CELL_W; lx++){
+          var px = cx * CELL_W + lx;
+          var py = cy * CELL_H + ly;
+          if (bitmap[py][px]){
+            var dotBit = lx * 4 + ly;
+            b |= (1 << dotBit);
+          }
+        }
+      }
+      bytes[cy * cellsX + cx] = b;
+    }
+  }
+  var hex = "";
+  for (var i = 0; i < bytes.length; i++){
+    hex += bytes[i].toString(16).padStart(2, "0");
+  }
+  return hex; // 600자
+}
+
+function buildBitmap(state){
+  var bmp = [];
+  for (var y = 0; y < PIN_H; y++){ bmp.push(new Uint8Array(PIN_W)); }
+
+  function fillTile(t){
+    var x0 = t.col * TILE_W, y0 = t.row * TILE_H;
+    for (var y = 0; y < TILE_H; y++){
+      for (var x = 0; x < TILE_W; x++){ bmp[y0 + y][x0 + x] = 1; }
+    }
+  }
+  function ringTile(t){
+    var x0 = t.col * TILE_W, y0 = t.row * TILE_H;
+    for (var x = 0; x < TILE_W; x++){ bmp[y0][x0 + x] = 1; bmp[y0 + TILE_H - 1][x0 + x] = 1; }
+    for (var y = 0; y < TILE_H; y++){ bmp[y0 + y][x0] = 1; bmp[y0 + y][x0 + TILE_W - 1] = 1; }
+  }
+
+  state.bushes.forEach(ringTile);   // 덤불: 속이 빈 테두리 — 터치로 지형지물 구분
+  fillTile(state.player);           // 나: 항상 꽉 찬 블록 (기준점)
+  if (state.monsterFlash){ fillTile(state.monster); } // 발소리 순간: 잠깐 꽉 찬 블록
+
+  return bmp;
+}
+
+/* ============================================================
+   2. DotPad SDK 어댑터
+   실제 dotpad-sdk/DotPadSDK-3.0.0.js(ES 모듈)를 동적 import로 로드합니다.
+   dot-games-host 표준(dotmaze 등)과 동일한 연결·키 매핑 방식을 그대로 따릅니다.
+   ============================================================ */
+var DotPad = (function(){
+  var sdk = null, scanner = null, KeyCodes = null, DataCodes = null;
+  var connected = false, onStatusChange = null;
+
+  function handleKey(device, keyCode){
+    if (!KeyCodes) return;
+    switch (keyCode){
+      // 물리 DotPad엔 방향키가 없어 F1~F4를 방향으로 씀(닷 미로와 동일한 규약)
+      case KeyCodes.KeyFunction1: Game.dispatch("move", "up"); break;
+      case KeyCodes.KeyFunction2: Game.dispatch("move", "down"); break;
+      case KeyCodes.KeyFunction3: Game.dispatch("move", "left"); break;
+      case KeyCodes.KeyFunction4: Game.dispatch("move", "right"); break;
+      case KeyCodes.PanningAll:   Game.dispatch("stay"); break;
+      case KeyCodes.PanningLeft:  Game.dispatch("repeat"); break;
+      case KeyCodes.PanningRight: Game.dispatch("help"); break;
+      case KeyCodes.LPF1:         Game.dispatch("pause"); break;
+    }
+  }
+
+  async function loadSDK(){
+    try{
+      var m = await import("./dotpad-sdk/DotPadSDK-3.0.0.js");
+      KeyCodes = m.KeyCodes; DataCodes = m.DataCodes;
+      sdk = new m.DotPadSDK();
+      scanner = new m.DotPadScanner();
+      sdk.setCallBack(function(device, code){
+        if (code === DataCodes.Connected){
+          connected = true;
+          if (onStatusChange) onStatusChange(true);
+          setTimeout(function(){ try{ sdk.displayAllDown(); }catch(e){} }, 200);
+        } else if (code === DataCodes.Disconnected){
+          connected = false;
+          if (onStatusChange) onStatusChange(false);
+        }
+      }, handleKey);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  async function requestConnect(){
+    if (!navigator.bluetooth){ return { ok: false, reason: "no-bluetooth" }; }
+    if (!sdk){
+      var loaded = await loadSDK();
+      if (!loaded) return { ok: false, reason: "sdk-load-failed" };
+    }
+    try{
+      var dev = null;
+      try{
+        dev = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: "DotPad" }, { namePrefix: "KM2-" }, { namePrefix: "KM3-" }, { namePrefix: "DPK" }, { namePrefix: "DMI" }],
+          optionalServices: [scanner.DOTPAD_SERVICE]
+        });
+      }catch(e){
+        if (e && e.name === "NotFoundError"){
+          dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [scanner.DOTPAD_SERVICE] });
+        } else { throw e; }
+      }
+      if (dev){ await sdk.connectBleDevice(dev); return { ok: true }; }
+      return { ok: false, reason: "cancelled" };
+    }catch(e){
+      if (e && e.name === "NotFoundError") return { ok: false, reason: "cancelled" };
+      return { ok: false, reason: (e && e.message) || "connect-failed" };
+    }
+  }
+
+  function render(hex){
+    if (!sdk || !connected) return;
+    try{ sdk.displayGraphicData(hex); }catch(e){}
+  }
+
+  // 승/패 순간의 촉각 펄스: 전체 up→down 몇 번 깜빡여 극적인 순간을 손끝으로도 전달
+  async function pulse(times){
+    if (!sdk || !connected) return;
+    try{
+      for (var i = 0; i < (times || 3); i++){
+        sdk.displayAllUp();
+        await new Promise(function(r){ setTimeout(r, 90); });
+        sdk.displayAllDown();
+        await new Promise(function(r){ setTimeout(r, 70); });
+      }
+    }catch(e){}
+  }
+
+  return {
+    loadSDK: loadSDK,
+    requestConnect: requestConnect,
+    render: render,
+    pulse: pulse,
+    isConnected: function(){ return connected; },
+    onStatus: function(fn){ onStatusChange = fn; }
+  };
+})();
+
+/* ============================================================
+   3. TTS (TW_TTS → speechSynthesis 폴백) + 자막
+   ============================================================ */
+var captionTextEl, liveAlertEl;
+var lastSpoken = "";
+
+function speak(text, opts){
+  opts = opts || {};
+  lastSpoken = text;
+  if (captionTextEl) captionTextEl.textContent = text;
+  if (opts.assertive && liveAlertEl) liveAlertEl.textContent = text;
+  try{
+    if (window.TW_TTS && typeof window.TW_TTS.speak === "function"){
+      window.TW_TTS.speak(text);
+      return;
+    }
+  }catch(e){}
+  try{
+    if ("speechSynthesis" in window){
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = "ko-KR";
+      window.speechSynthesis.speak(u);
+    }
+  }catch(e){}
+}
+function repeatLast(){ speak(lastSpoken || "아직 안내가 없어요."); }
+
+/* ============================================================
+   4. 오디오 엔진 — 전부 WebAudio 합성음 (외부 파일 의존 없음)
+   ============================================================ */
+var AudioEngine = (function(){
+  var ctx = null, breathingNodes = null, noiseBuffer = null;
+
+  function ensureCtx(){
+    if (ctx) return ctx;
+    try{
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      ctx = new Ctx();
+    }catch(e){ ctx = null; }
+    return ctx;
+  }
+  function resume(){ var c = ensureCtx(); if (c && c.state === "suspended") { try{ c.resume(); }catch(e){} } }
+
+  function getNoiseBuffer(){
+    var c = ensureCtx();
+    if (!c) return null;
+    if (noiseBuffer) return noiseBuffer;
+    var len = c.sampleRate * 2;
+    noiseBuffer = c.createBuffer(1, len, c.sampleRate);
+    var data = noiseBuffer.getChannelData(0);
+    for (var i = 0; i < len; i++){ data[i] = Math.random() * 2 - 1; }
+    return noiseBuffer;
+  }
+
+  // 발소리: 거리(dist)에 따라 피치/음량, 좌우 방향(pan)에 따라 스테레오 팬
+  function footstep(pan, distance, muffled){
+    var c = ensureCtx();
+    if (!c) return;
+    var now = c.currentTime;
+    var vol = clamp(1 - distance / MAX_DIST, 0.08, 1) * (muffled ? 0.55 : 1);
+    var freq = 180 + (1 - distance / MAX_DIST) * 340;
+
+    var osc = c.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(60, freq * 0.6), now + 0.09);
+
+    var gain = c.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(vol, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+
+    var panner = (c.createStereoPanner) ? c.createStereoPanner() : null;
+    if (panner) panner.pan.setValueAtTime(clamp(pan, -1, 1), now);
+
+    osc.connect(gain);
+    if (panner){ gain.connect(panner); panner.connect(c.destination); }
+    else { gain.connect(c.destination); }
+    osc.start(now);
+    osc.stop(now + 0.16);
+  }
+
+  function setBreathing(active, pan, intensity){
+    var c = ensureCtx();
+    if (!c) return;
+    if (!active){
+      if (breathingNodes){
+        try{
+          var t = c.currentTime;
+          breathingNodes.gain.gain.cancelScheduledValues(t);
+          breathingNodes.gain.gain.linearRampToValueAtTime(0.0001, t + 0.35);
+          var nodes = breathingNodes;
+          setTimeout(function(){
+            try{ nodes.src.stop(); }catch(e){}
+            try{ nodes.lfo.stop(); }catch(e){}
+          }, 400);
+        }catch(e){}
+        breathingNodes = null;
+      }
+      return;
+    }
+    if (breathingNodes){
+      try{
+        var now2 = c.currentTime;
+        breathingNodes.panner && breathingNodes.panner.pan.setValueAtTime(clamp(pan, -1, 1), now2);
+        breathingNodes.gain.gain.linearRampToValueAtTime(0.05 + intensity * 0.13, now2 + 0.2);
+      }catch(e){}
+      return;
+    }
+    var buf = getNoiseBuffer();
+    if (!buf) return;
+    var src = c.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    var filter = c.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 420;
+    var gain = c.createGain();
+    gain.gain.value = 0.0001;
+    var lfo = c.createOscillator();
+    lfo.frequency.value = 0.5;
+    var lfoGain = c.createGain();
+    lfoGain.gain.value = 0.03 + intensity * 0.1;
+    lfo.connect(lfoGain);
+    lfoGain.connect(gain.gain);
+
+    var panner = c.createStereoPanner ? c.createStereoPanner() : null;
+    src.connect(filter);
+    filter.connect(gain);
+    if (panner){ gain.connect(panner); panner.connect(c.destination); panner.pan.setValueAtTime(clamp(pan, -1, 1), c.currentTime); }
+    else { gain.connect(c.destination); }
+
+    src.start(); lfo.start();
+    gain.gain.linearRampToValueAtTime(0.05 + intensity * 0.13, c.currentTime + 0.25);
+    breathingNodes = { src: src, lfo: lfo, gain: gain, panner: panner };
+  }
+
+  function sting(kind){
+    var c = ensureCtx();
+    if (!c) return;
+    var now = c.currentTime;
+    if (kind === "caught"){
+      var osc = c.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.6);
+      var g = c.createGain();
+      g.gain.setValueAtTime(0.28, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(now); osc.stop(now + 0.7);
+    } else if (kind === "dawn"){
+      [523.25, 659.25, 783.99].forEach(function(f, i){
+        var osc = c.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = f;
+        var g = c.createGain();
+        var t0 = now + i * 0.12;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.16, t0 + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+        osc.connect(g); g.connect(c.destination);
+        osc.start(t0); osc.stop(t0 + 0.55);
+      });
+    } else if (kind === "denied"){
+      var osc2 = c.createOscillator();
+      osc2.type = "square";
+      osc2.frequency.value = 110;
+      var g2 = c.createGain();
+      g2.gain.setValueAtTime(0.12, now);
+      g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+      osc2.connect(g2); g2.connect(c.destination);
+      osc2.start(now); osc2.stop(now + 0.1);
+    }
+  }
+
+  // 플레이어 자신의 이동 소리 — 몬스터 발소리(tone)와 다른 음색(짧은 노이즈 틱)으로 구분
+  function playerStep(){
+    var c = ensureCtx();
+    if (!c) return;
+    var buf = getNoiseBuffer();
+    if (!buf) return;
+    var now = c.currentTime;
+    var src = c.createBufferSource();
+    src.buffer = buf;
+    var filter = c.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 900;
+    filter.Q.value = 2;
+    var gain = c.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.22, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+    src.connect(filter); filter.connect(gain); gain.connect(c.destination);
+    src.start(now); src.stop(now + 0.09);
+  }
+
+  return { resume: resume, footstep: footstep, setBreathing: setBreathing, sting: sting, playerStep: playerStep };
+})();
+
+/* ============================================================
+   5. 임베드 / postMessage (source:'dotarcade')
+   ============================================================ */
+var isEmbed = false;
+try{ isEmbed = new URLSearchParams(window.location.search).get("embed") === "1"; }catch(e){}
+function postToHost(type, payload){
+  if (!isEmbed) return;
+  try{
+    var msg = { source: "dotarcade", type: type };
+    for (var k in (payload || {})) { msg[k] = payload[k]; }
+    window.parent.postMessage(msg, "*");
+  }catch(e){}
+}
+
+/* ============================================================
+   6. 게임 상태 + 순수 로직 (그리드/몬스터 AI/턴 해석)
+   ============================================================ */
+var state = {
+  screen: "title",
+  roundsTotal: 10,
+  round: 0,
+  player: { row: ROWS - 1, col: 0 },
+  monster: { row: 0, col: COLS - 1 },
+  monsterPrev: null,
+  bushes: [],
+  alertTimer: 0,
+  lastNoise: null,
+  prevDistance: 0,
+  monsterFlash: false,
+  monsterFlashTimer: null,
+  paused: false,
+  gameOver: false
+};
+var selectedRounds = 10;
+
+function generateBushes(exclude, count){
+  var all = [];
+  for (var r = 0; r < ROWS; r++){ for (var c = 0; c < COLS; c++){ all.push({ row: r, col: c }); } }
+  var pool = all.filter(function(t){
+    return !exclude.some(function(e){ return sameTile(e, t); });
+  });
+  var chosen = [];
+  while (chosen.length < count && pool.length){
+    var idx = Math.floor(Math.random() * pool.length);
+    chosen.push(pool[idx]);
+    pool.splice(idx, 1);
+  }
+  return chosen;
+}
+function bushAt(t){
+  for (var i = 0; i < state.bushes.length; i++){ if (sameTile(state.bushes[i], t)) return state.bushes[i]; }
+  return null;
+}
+function adjacentBush(t){
+  for (var i = 0; i < state.bushes.length; i++){ if (dist(state.bushes[i], t) === 1) return state.bushes[i]; }
+  return null;
+}
+
+function greedyTowards(cands, target){
+  var sorted = cands.slice().sort(function(a, b){ return dist(a, target) - dist(b, target); });
+  var bestD = dist(sorted[0], target);
+  var bestOnes = sorted.filter(function(c){ return dist(c, target) === bestD; });
+  return pickRandom(bestOnes);
+}
+
+function stepMonster(){
+  var prev = state.monster;
+  var cand = neighbors(state.monster).filter(function(n){
+    return !(state.monsterPrev && sameTile(n, state.monsterPrev));
+  });
+  if (cand.length === 0) cand = neighbors(state.monster);
+
+  var practice = state.roundsTotal === 0;
+  var greedyChance = practice ? 0.45 : 0.8;
+  var senseBase = practice ? 0.02 : 0.05;
+  var senseSlope = practice ? 0.006 : 0.015;
+  var senseCap = practice ? 0.15 : 0.35;
+
+  var choice;
+  if (state.alertTimer > 0 && state.lastNoise){
+    choice = (Math.random() < greedyChance) ? greedyTowards(cand, state.lastNoise) : pickRandom(cand);
+  } else {
+    var senseChance = Math.min(senseCap, senseBase + state.round * senseSlope);
+    choice = (Math.random() < senseChance) ? greedyTowards(cand, state.player) : pickRandom(cand);
+  }
+  state.monsterPrev = prev;
+  state.monster = choice;
+  if (state.alertTimer > 0) state.alertTimer--;
+}
+
+function tryMove(dir){
+  var deltas = { up: [-1,0], down: [1,0], left: [0,-1], right: [0,1] };
+  var d = deltas[dir];
+  if (!d) return { ok: false };
+  var next = { row: state.player.row + d[0], col: state.player.col + d[1] };
+  if (!inBounds(next)) return { ok: false };
+  state.player = next;
+  state.alertTimer = 3;
+  state.lastNoise = { row: next.row, col: next.col };
+  return { ok: true };
+}
+
+function updateNarrative(noiseThisTurn){
+  var newDist = dist(state.player, state.monster);
+  var onBush = !!bushAt(state.player);
+  var prevD = state.prevDistance;
+  var line, urgent = false;
+
+  if (noiseThisTurn && onBush){
+    line = "덤불 속으로 숨었어요. 발소리가 조금 죽었어요.";
+  } else {
+    var nearBush = adjacentBush(state.player);
+    if (nearBush && !onBush && newDist >= 4 && state.alertTimer === 0){
+      line = "지금이 기회예요! 덤불로 뛰어들 수 있어요.";
+    } else if (newDist <= 1){
+      line = "숨소리가 들려요… 바로 옆이에요.";
+      urgent = true;
+    } else if (prevD <= 1 && newDist >= 3){
+      line = "가만히 있어… 지나갔어요.";
+    } else if (newDist - prevD <= -2){
+      line = "발소리가 빠르게 가까워지고 있어요.";
+    } else if (newDist - prevD >= 2){
+      line = "발소리가 멀어지고 있어요.";
+    } else {
+      line = "조용해요… 발소리가 그대로예요.";
+    }
+  }
+  speak(line, { assertive: urgent });
+  state.prevDistance = newDist;
+}
+
+function updateAudioFeedback(){
+  var pan = clamp((state.monster.col - state.player.col) / (COLS - 1), -1, 1);
+  var distance = dist(state.player, state.monster);
+  var muffled = !!bushAt(state.player);
+  AudioEngine.footstep(pan, distance, muffled);
+  AudioEngine.setBreathing(distance <= 1, pan, clamp(1 - distance / MAX_DIST, 0, 1));
+}
+
+function triggerMonsterFlash(){
+  state.monsterFlash = true;
+  if (state.monsterFlashTimer) clearTimeout(state.monsterFlashTimer);
+  state.monsterFlashTimer = setTimeout(function(){
+    state.monsterFlash = false;
+    renderTactilePreview();
+    pushTactile();
+  }, 700);
+}
+
+function bestKey(){ return state.roundsTotal === 0 ? "practice" : String(state.roundsTotal); }
+function getBest(key){
+  try{ return parseInt(localStorage.getItem("dotFootsteps.best." + key) || "0", 10); }catch(e){ return 0; }
+}
+function setBest(key, val){
+  try{ localStorage.setItem("dotFootsteps.best." + key, String(val)); }catch(e){}
+}
+
+/* ============================================================
+   7. DOM 렌더 / 화면 전환
+   ============================================================ */
+var hudRoundEl, hudRoundTotalEl, hudBestEl, tensionFillEl;
+var overlayPause, overlayResults, resultTitleEl, resultSubEl, resultRoundsEl, resultBestEl;
+var tileEls = [];
+
+function showScreen(id){
+  var all = document.querySelectorAll(".screen");
+  for (var i = 0; i < all.length; i++){ all[i].classList.remove("is-active"); }
+  document.getElementById(id).classList.add("is-active");
+}
+
+function initTactilePreview(){
+  var el = document.getElementById("tactile-preview");
+  el.innerHTML = "";
+  tileEls = [];
+  for (var r = 0; r < ROWS; r++){
+    var rowArr = [];
+    for (var c = 0; c < COLS; c++){
+      var d = document.createElement("div");
+      d.className = "tile";
+      el.appendChild(d);
+      rowArr.push(d);
+    }
+    tileEls.push(rowArr);
+  }
+}
+
+function renderTactilePreview(){
+  for (var r = 0; r < ROWS; r++){
+    for (var c = 0; c < COLS; c++){ tileEls[r][c].className = "tile"; }
+  }
+  state.bushes.forEach(function(b){ tileEls[b.row][b.col].classList.add("is-bush"); });
+  var onBush = !!bushAt(state.player);
+  tileEls[state.player.row][state.player.col].classList.add(onBush ? "is-player-bush" : "is-player");
+  if (state.monsterFlash){
+    tileEls[state.monster.row][state.monster.col].classList.add("is-monster-flash");
+  }
+}
+
+function pushTactile(){ DotPad.render(encodePins(buildBitmap(state))); }
+
+function render(){
+  hudRoundEl.textContent = state.round;
+  var dNow = dist(state.player, state.monster);
+  var tensionPct = clamp(100 - Math.round((dNow * 100) / MAX_DIST), 6, 100);
+  tensionFillEl.style.width = tensionPct + "%";
+  renderTactilePreview();
+  pushTactile();
+  drawPin();
+}
+
+function showResults(caught, survived, best){
+  resultTitleEl.textContent = caught ? "들켰어요…" : (state.roundsTotal > 0 ? "새벽이 밝았어요" : "정말 오래 버텼어요");
+  resultSubEl.textContent = caught ? "그래도 " + survived + "라운드나 숨죽였어요." : "끝까지 들키지 않았어요.";
+  resultRoundsEl.textContent = survived;
+  resultBestEl.textContent = best;
+  overlayResults.hidden = false;
+}
+
+/* ============================================================
+   8. 턴 해석 / 게임 시작·종료 / 일시정지
+   ============================================================ */
+function speakRules(){
+  speak("방향키로 움직이면 소리가 나서 위치가 들켜요. F1로 가만히 있으면 안전해요. 덤불에 숨으면 더 안전하지만 소리도 잘 안 들려요. 발소리가 가까워지면 숨소리가 들려요.");
+}
+
+function togglePause(){
+  if (state.gameOver) return;
+  state.paused = !state.paused;
+  if (state.paused){
+    AudioEngine.setBreathing(false);
+    overlayPause.hidden = false;
+  } else {
+    overlayPause.hidden = true;
+  }
+}
+
+function endGame(caught){
+  state.gameOver = true;
+  AudioEngine.setBreathing(false);
+  if (caught){
+    AudioEngine.sting("caught");
+    speak("들켰어요…", { assertive: true });
+  } else {
+    AudioEngine.sting("dawn");
+    speak(state.roundsTotal > 0 ? "새벽이 밝았어요. 살았어요!" : "정말 오래 버텼어요!", { assertive: true });
+  }
+  DotPad.pulse(caught ? 2 : 3);
+  var key = bestKey();
+  var best = getBest(key);
+  var survived = state.round;
+  if (survived > best){ setBest(key, survived); best = survived; }
+  render();
+  showResults(caught, survived, best);
+  postToHost("gameover", { caught: caught, rounds: survived });
+}
+
+function startGame(roundsTotal){
+  state.screen = "game";
+  state.roundsTotal = roundsTotal;
+  state.round = 0;
+  state.player = { row: ROWS - 1, col: 0 };
+  state.monster = { row: 0, col: COLS - 1 };
+  state.monsterPrev = null;
+  state.bushes = generateBushes([state.player, state.monster], 3);
+  state.alertTimer = 0;
+  state.lastNoise = null;
+  state.prevDistance = dist(state.player, state.monster);
+  state.monsterFlash = false;
+  if (state.monsterFlashTimer) clearTimeout(state.monsterFlashTimer);
+  state.paused = false;
+  state.gameOver = false;
+
+  overlayPause.hidden = true;
+  overlayResults.hidden = true;
+  showScreen("screen-game");
+  hudRoundTotalEl.textContent = roundsTotal > 0 ? ("/" + roundsTotal) : " · 연습";
+  hudBestEl.textContent = getBest(bestKey());
+
+  AudioEngine.resume();
+  speak("숨을 죽이세요. 발소리가 들리기 시작해요.");
+  render();
+}
+
+var Game = {};
+Game.dispatch = function(action, dir){
+  if (state.screen !== "game") return;
+  if (action === "pause"){ togglePause(); return; }
+  if (action === "help"){ speakRules(); return; }
+  if (action === "repeat"){ repeatLast(); return; }
+  if (state.paused || state.gameOver) return;
+
+  var noiseThisTurn = false;
+  if (action === "move"){
+    var res = tryMove(dir);
+    if (!res.ok){ AudioEngine.sting("denied"); speak("그쪽엔 더 갈 곳이 없어요."); return; }
+    noiseThisTurn = true;
+    AudioEngine.playerStep();
+  } else if (action === "stay"){
+    noiseThisTurn = false;
+  } else { return; }
+
+  stepMonster();
+  state.round++;
+
+  if (sameTile(state.player, state.monster)){
+    triggerMonsterFlash();
+    endGame(true);
+    return;
+  }
+
+  triggerMonsterFlash();
+  updateAudioFeedback();
+  updateNarrative(noiseThisTurn);
+  render();
+
+  if (state.roundsTotal > 0 && state.round >= state.roundsTotal){
+    endGame(false);
+  }
+};
+
+/* ============================================================
+   9. 초기화 / 이벤트 바인딩
+   ============================================================ */
+var pinCanvas, pinCtx, pinwrapEl;
+
+function drawPin(){
+  if (!pinwrapEl || !pinwrapEl.classList.contains("show")) return;
+  var frame = buildBitmap(state);
+  var Wp = pinCanvas.clientWidth || 150;
+  var gap = Wp / PIN_W;
+  var cssH = gap * PIN_H;
+  var dpr = window.devicePixelRatio || 1;
+  pinCanvas.style.height = cssH + "px";
+  pinCanvas.width = Math.round(Wp * dpr);
+  pinCanvas.height = Math.round(cssH * dpr);
+  pinCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  pinCtx.clearRect(0, 0, Wp, cssH);
+  var rOn = gap * 0.34, rOff = gap * 0.13;
+  for (var y = 0; y < PIN_H; y++){
+    for (var x = 0; x < PIN_W; x++){
+      var on = frame[y][x];
+      var px = x * gap + gap / 2, py = y * gap + gap / 2;
+      pinCtx.fillStyle = on ? "#FF6A3D" : "#2A241F";
+      pinCtx.beginPath();
+      pinCtx.arc(px, py, on ? rOn : rOff, 0, Math.PI * 2);
+      pinCtx.fill();
+    }
+  }
+}
+
+function updateDotPadUI(connected){
+  var labels = document.querySelectorAll(".dp-label");
+  for (var i = 0; i < labels.length; i++){
+    labels[i].textContent = connected ? "닷패드 연결됨" : "닷패드 연결";
+  }
+  var btns = [document.getElementById("btn-dotpad-title"), document.getElementById("btn-dotpad-game")];
+  btns.forEach(function(b){ if (b) b.setAttribute("aria-pressed", connected ? "true" : "false"); });
+  if (connected){
+    speak("닷패드가 연결됐어요. F1부터 F4가 위, 아래, 왼쪽, 오른쪽이에요.");
+  }
+}
+
+async function handleConnectDotPad(){
+  AudioEngine.resume();
+  var res = await DotPad.requestConnect();
+  if (!res.ok && res.reason === "no-bluetooth"){
+    speak("이 브라우저는 블루투스를 지원하지 않아요. 크롬이나 엣지에서 열어 주세요.");
+  } else if (!res.ok && res.reason !== "cancelled"){
+    speak("닷패드 연결에 실패했어요.");
+  }
+}
+
+function init(){
+  if (isEmbed) document.body.classList.add("embed");
+  if (window.TW_TTS) TW_TTS.setLang("ko");
+
+  captionTextEl = document.getElementById("caption-text");
+  liveAlertEl = document.getElementById("live-alert");
+  hudRoundEl = document.getElementById("hud-round");
+  hudRoundTotalEl = document.getElementById("hud-round-total");
+  hudBestEl = document.getElementById("hud-best");
+  tensionFillEl = document.getElementById("tension-fill");
+  overlayPause = document.getElementById("overlay-pause");
+  overlayResults = document.getElementById("overlay-results");
+  resultTitleEl = document.getElementById("result-title");
+  resultSubEl = document.getElementById("result-sub");
+  resultRoundsEl = document.getElementById("result-rounds");
+  resultBestEl = document.getElementById("result-best");
+  pinwrapEl = document.getElementById("pinwrap");
+  pinCanvas = document.getElementById("pin");
+  pinCtx = pinCanvas ? pinCanvas.getContext("2d") : null;
+
+  initTactilePreview();
+
+  var diffButtons = document.querySelectorAll("#difficulty-grid .choice-btn");
+  for (var i = 0; i < diffButtons.length; i++){
+    diffButtons[i].addEventListener("click", function(){
+      for (var j = 0; j < diffButtons.length; j++){ diffButtons[j].classList.remove("is-selected"); }
+      this.classList.add("is-selected");
+      selectedRounds = parseInt(this.getAttribute("data-rounds"), 10);
+    });
+  }
+
+  document.getElementById("btn-start").addEventListener("click", function(){
+    AudioEngine.resume();
+    startGame(selectedRounds);
+  });
+  document.getElementById("btn-howto").addEventListener("click", function(){
+    AudioEngine.resume();
+    speakRules();
+  });
+  document.getElementById("btn-repeat").addEventListener("click", function(){ Game.dispatch("repeat"); });
+  document.getElementById("btn-pause").addEventListener("click", function(){ Game.dispatch("pause"); });
+  document.getElementById("btn-resume").addEventListener("click", function(){ Game.dispatch("pause"); });
+  document.getElementById("btn-quit-title").addEventListener("click", function(){
+    state.paused = false;
+    overlayPause.hidden = true;
+    AudioEngine.setBreathing(false);
+    state.screen = "title";
+    showScreen("screen-title");
+  });
+  document.getElementById("btn-retry").addEventListener("click", function(){
+    overlayResults.hidden = true;
+    startGame(state.roundsTotal);
+  });
+  document.getElementById("btn-to-title").addEventListener("click", function(){
+    overlayResults.hidden = true;
+    state.screen = "title";
+    showScreen("screen-title");
+  });
+
+  var dotpadBtns = [document.getElementById("btn-dotpad-title"), document.getElementById("btn-dotpad-game")];
+  dotpadBtns.forEach(function(b){ if (b) b.addEventListener("click", handleConnectDotPad); });
+
+  var pinToggle = document.getElementById("btn-pin-toggle");
+  if (pinToggle){
+    pinToggle.addEventListener("click", function(){
+      var on = pinwrapEl.classList.toggle("show");
+      pinToggle.setAttribute("aria-pressed", String(on));
+      if (on) drawPin();
+    });
+  }
+
+  var dpadButtons = document.querySelectorAll(".dpad [data-dir]");
+  for (var k = 0; k < dpadButtons.length; k++){
+    dpadButtons[k].addEventListener("click", function(){ Game.dispatch("move", this.getAttribute("data-dir")); });
+  }
+  var stayBtn = document.querySelector('.dpad [data-action="stay"]');
+  if (stayBtn) stayBtn.addEventListener("click", function(){ Game.dispatch("stay"); });
+
+  document.addEventListener("keydown", function(e){
+    var map = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+    if (map[e.key]){ e.preventDefault(); Game.dispatch("move", map[e.key]); return; }
+    var k = e.key.toLowerCase();
+    if (k === "s"){ e.preventDefault(); Game.dispatch("stay"); return; }
+    if (k === "r"){ e.preventDefault(); Game.dispatch("repeat"); return; }
+    if (k === "p"){ e.preventDefault(); Game.dispatch("pause"); return; }
+    if (k === "h" || e.key === "?"){ e.preventDefault(); Game.dispatch("help"); return; }
+    if (e.key === "Escape" && state.screen === "game"){ e.preventDefault(); Game.dispatch("pause"); return; }
+  });
+
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden && state.screen === "game" && !state.gameOver && !state.paused){
+      Game.dispatch("pause");
+    }
+  });
+
+  window.addEventListener("resize", function(){
+    clearTimeout(window.__dgResizePin);
+    window.__dgResizePin = setTimeout(drawPin, 150);
+  });
+
+  DotPad.onStatus(updateDotPadUI);
+  DotPad.loadSDK(); // 클래스 준비만(실제 연결은 버튼의 사용자 제스처로)
+  postToHost("ready", {});
+}
+
+if (document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+
+})();
+</script>
+
+</body>
+</html>
