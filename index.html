@@ -226,6 +226,7 @@ button{ font-family:inherit; }
 .btn-primary:hover{ filter:brightness(1.06); }
 .btn-ghost{ background: transparent; color: var(--dg-text); border:1.5px solid var(--dg-border); }
 .btn-ghost:hover{ border-color: var(--dg-accent); }
+.btn-sound{ padding: 14px; min-width: 48px; }
 .btn-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
 
 .controls-legend{
@@ -512,6 +513,7 @@ body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
         <svg class="icon" viewBox="0 0 24 24"><path d="M7 8l10 8l-5 4v-16l5 4l-10 8"/></svg>
         <span class="dp-label">닷패드 연결</span>
       </button>
+      <button class="btn btn-ghost btn-sound" id="btn-sound-title" type="button" aria-pressed="true" aria-label="음성 켜짐, 누르면 끔"></button>
     </div>
   </section>
 
@@ -563,6 +565,7 @@ body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
             <svg class="icon" viewBox="0 0 24 24"><path d="M5 5h.01M12 5h.01M19 5h.01M5 12h.01M12 12h.01M19 12h.01M5 19h.01M12 19h.01M19 19h.01"/></svg>
             핀 미리보기
           </button>
+          <button class="btn btn-ghost btn-sound" id="btn-sound-game" type="button" aria-pressed="true" aria-label="음성 켜짐, 누르면 끔"></button>
         </div>
       </div>
     </div>
@@ -795,12 +798,14 @@ var DotPad = (function(){
    ============================================================ */
 var captionTextEl, liveAlertEl;
 var lastSpoken = "";
+var soundOn = true;
 
 function speak(text, opts){
   opts = opts || {};
   lastSpoken = text;
   if (captionTextEl) captionTextEl.textContent = text;
   if (opts.assertive && liveAlertEl) liveAlertEl.textContent = text;
+  if (!soundOn) return; // 자막은 남기고 소리만 끔
   try{
     if (window.TW_TTS && typeof window.TW_TTS.speak === "function"){
       window.TW_TTS.speak(text);
@@ -822,7 +827,7 @@ function repeatLast(){ speak(lastSpoken || "아직 안내가 없어요."); }
    4. 오디오 엔진 — 전부 WebAudio 합성음 (외부 파일 의존 없음)
    ============================================================ */
 var AudioEngine = (function(){
-  var ctx = null, breathingNodes = null, noiseBuffer = null;
+  var ctx = null, breathingNodes = null, noiseBuffer = null, enabled = true;
 
   function ensureCtx(){
     if (ctx) return ctx;
@@ -847,6 +852,7 @@ var AudioEngine = (function(){
 
   // 발소리: 거리(dist)에 따라 피치/음량, 좌우 방향(pan)에 따라 스테레오 팬
   function footstep(pan, distance, muffled){
+    if (!enabled) return;
     var c = ensureCtx();
     if (!c) return;
     var now = c.currentTime;
@@ -874,6 +880,7 @@ var AudioEngine = (function(){
   }
 
   function setBreathing(active, pan, intensity){
+    if (!enabled) active = false;
     var c = ensureCtx();
     if (!c) return;
     if (!active){
@@ -928,6 +935,7 @@ var AudioEngine = (function(){
   }
 
   function sting(kind){
+    if (!enabled) return;
     var c = ensureCtx();
     if (!c) return;
     var now = c.currentTime;
@@ -968,6 +976,7 @@ var AudioEngine = (function(){
 
   // 플레이어 자신의 이동 소리 — 몬스터 발소리(tone)와 다른 음색(짧은 노이즈 틱)으로 구분
   function playerStep(){
+    if (!enabled) return;
     var c = ensureCtx();
     if (!c) return;
     var buf = getNoiseBuffer();
@@ -987,7 +996,12 @@ var AudioEngine = (function(){
     src.start(now); src.stop(now + 0.09);
   }
 
-  return { resume: resume, footstep: footstep, setBreathing: setBreathing, sting: sting, playerStep: playerStep };
+  function setEnabled(on){
+    enabled = !!on;
+    if (!enabled) setBreathing(false);
+  }
+
+  return { resume: resume, footstep: footstep, setBreathing: setBreathing, sting: sting, playerStep: playerStep, setEnabled: setEnabled };
 })();
 
 /* ============================================================
@@ -1315,6 +1329,27 @@ Game.dispatch = function(action, dir){
    ============================================================ */
 var pinCanvas, pinCtx, pinwrapEl;
 
+var SVG_VOL = '<svg class="icon" viewBox="0 0 24 24"><path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"/></svg>';
+var SVG_VOL_OFF = '<svg class="icon" viewBox="0 0 24 24"><path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5 5 0 0 1 -.535 .464"/><path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9 9 0 0 1 -.686 .615"/><path d="M9.069 5.054l.431 -.554a.8 .8 0 0 1 1.5 .5v2m0 4v8a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"/><path d="M3 3l18 18"/></svg>';
+
+function updateSoundUI(){
+  var btns = [document.getElementById("btn-sound-title"), document.getElementById("btn-sound-game")];
+  btns.forEach(function(b){
+    if (!b) return;
+    b.innerHTML = soundOn ? SVG_VOL : SVG_VOL_OFF;
+    b.setAttribute("aria-pressed", String(soundOn));
+    b.setAttribute("aria-label", soundOn ? "음성 켜짐, 누르면 끔" : "음성 꺼짐, 누르면 켬");
+  });
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+  updateSoundUI();
+  AudioEngine.setEnabled(soundOn);
+  if (soundOn){ speak("소리를 켰어요."); }
+  else if (window.TW_TTS){ try{ TW_TTS.stop(); }catch(e){} }
+}
+
 function drawPin(){
   if (!pinwrapEl || !pinwrapEl.classList.contains("show")) return;
   var frame = buildBitmap(state);
@@ -1423,6 +1458,10 @@ function init(){
 
   var dotpadBtns = [document.getElementById("btn-dotpad-title"), document.getElementById("btn-dotpad-game")];
   dotpadBtns.forEach(function(b){ if (b) b.addEventListener("click", handleConnectDotPad); });
+
+  var soundBtns = [document.getElementById("btn-sound-title"), document.getElementById("btn-sound-game")];
+  soundBtns.forEach(function(b){ if (b) b.addEventListener("click", toggleSound); });
+  updateSoundUI();
 
   var pinToggle = document.getElementById("btn-pin-toggle");
   if (pinToggle){

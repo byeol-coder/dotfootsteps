@@ -20,6 +20,8 @@
           PanningRight 도움말 · LPF1 일시정지.
     (물리 DotPad엔 방향키가 없어, 닷 미로와 동일하게 F1~F4를 방향으로 사용)
   승/패 순간엔 displayAllUp/Down 몇 회 깜빡임으로 촉각 펄스도 함께 전달.
+  소리 켜기/끄기: 다른 5개 게임과 동일한 스피커 아이콘 토글(화면 상시 노출). 꺼도 자막은 유지되고
+    TTS·효과음만 함께 음소거(다른 게임들의 soundOn 패턴 그대로 재사용).
 
 ■ 배경 이미지: assets/bg.webp (제공된 footsteps-gameplay 게임플레이 아트: 야간 숲길 + 발광 발자국 트레일).
   linear-gradient 오버레이 + cover 방식으로 기존 배경 규약 그대로 적용.
