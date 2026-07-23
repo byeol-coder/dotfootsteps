@@ -495,8 +495,6 @@ button{ font-family:inherit; }
 .pinwrap canvas{ width:150px; display:block; border-radius:6px; background:#0B0A08; }
 .pinwrap .cap{ font-family:var(--dg-font-mono); font-size:10px; color:var(--dg-text-faint); text-align:center; margin-top:4px; }
 
-/* 임베드(?embed=1) 모드: 실제 기기로 보고 있으므로 화면 속 핀 미리보기는 숨김 */
-body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
 </style>
 </head>
 <body>
@@ -1057,7 +1055,12 @@ var AudioEngine = (function(){
    5. 임베드 / postMessage (source:'dotarcade')
    ============================================================ */
 var isEmbed = false;
-try{ isEmbed = new URLSearchParams(window.location.search).get("embed") === "1"; }catch(e){}
+var wantsPreview = false;
+try{
+  var _qp = new URLSearchParams(window.location.search);
+  isEmbed = _qp.get("embed") === "1";
+  wantsPreview = _qp.get("preview") === "1";
+}catch(e){}
 function postToHost(type, payload){
   if (!isEmbed) return;
   try{
@@ -1447,6 +1450,7 @@ function toggleSound(){
 
 function drawPin(){
   if (!pinwrapEl || !pinwrapEl.classList.contains("show")) return;
+  if (!pinCanvas || !pinCtx) return;
   var frame = buildBitmap(state);
   var Wp = pinCanvas.clientWidth || 150;
   var gap = Wp / PIN_W;
@@ -1588,6 +1592,11 @@ function init(){
       pinToggle.setAttribute("aria-pressed", String(on));
       if (on) drawPin();
     });
+    if (wantsPreview){
+      pinwrapEl.classList.add("show");
+      pinToggle.setAttribute("aria-pressed", "true");
+      drawPin();
+    }
   }
 
   var dpadButtons = document.querySelectorAll(".dpad [data-dir]");
