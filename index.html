@@ -1233,13 +1233,15 @@ function stepMonster(){
   if (cand.length === 0) cand = neighbors(state.monster);
 
   var practice = state.roundsTotal === 0;
-  var greedyChance = practice ? 0.45 : 0.8;
-  var senseBase = practice ? 0.02 : 0.05;
-  var senseSlope = practice ? 0.006 : 0.015;
-  var senseCap = practice ? 0.15 : 0.35;
-  // 한자리에 계속 웅크릴수록(stayStreak) 발소리·냄새로 들킬 확률이 확실히 누적됨 —
-  // "가만히 있으면 사실상 절대 안 잡힌다"는 문제를 막기 위한 핵심 보정.
-  var campBonus = Math.min(0.55, Math.max(0, state.stayStreak - 2) * (practice ? 0.05 : 0.08));
+  var greedyChance = practice ? 0.5 : 0.8;
+  // 라운드가 지날수록 오르는 "기본 위험도" — 웅크림 패턴 관리로 완전히 피할 수 없도록
+  // 캠핑 여부와 무관하게 확실히 누적되는 최소 위험선(바닥)을 훨씬 높게 잡음.
+  var senseBase = practice ? 0.04 : 0.10;
+  var senseSlope = practice ? 0.012 : 0.03;
+  var senseCap = practice ? 0.28 : 0.55;
+  // 한자리에 계속 웅크릴수록(stayStreak) 발소리·냄새로 들킬 확률이 추가로 누적됨 —
+  // 봐주는 턴을 1턴으로 줄여서 "2턴마다 한 번씩만 움직여 리셋"하는 패턴도 안전하지 않게 함.
+  var campBonus = Math.min(0.6, Math.max(0, state.stayStreak - 1) * (practice ? 0.07 : 0.11));
 
   var choice;
   if (state.alertTimer > 0 && state.lastNoise){
@@ -1276,7 +1278,7 @@ function updateNarrative(noiseThisTurn){
     line = "덤불 속으로 숨었어요. 발소리가 조금 죽었어요.";
   } else {
     var nearBush = adjacentBush(state.player);
-    var campWarnDue = !noiseThisTurn && state.stayStreak > 0 && state.stayStreak % 3 === 0 && newDist > 1;
+    var campWarnDue = !noiseThisTurn && state.stayStreak > 0 && state.stayStreak % 2 === 0 && newDist > 1;
     if (nearBush && !onBush && newDist >= 4 && state.alertTimer === 0){
       line = "지금이 기회예요! 덤불로 뛰어들 수 있어요.";
     } else if (newDist <= 1){
