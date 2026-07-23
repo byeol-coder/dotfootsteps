@@ -229,33 +229,80 @@ button{ font-family:inherit; }
 .btn-sound{ padding: 14px; min-width: 48px; }
 .btn-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
 
+.controls-tabs{
+  display:inline-flex;
+  gap:4px;
+  background: var(--dg-bg-alt);
+  border:1px solid var(--dg-border);
+  border-radius: var(--dg-radius-pill);
+  padding:4px;
+  margin-bottom:14px;
+}
+.controls-tab{
+  appearance:none;
+  border:none;
+  background:transparent;
+  color: var(--dg-text-muted);
+  font-family: var(--dg-font-mono);
+  font-size:12px;
+  letter-spacing:.04em;
+  border-radius: var(--dg-radius-pill);
+  padding:7px 16px;
+  cursor:pointer;
+  transition: background var(--dg-motion-fast), color var(--dg-motion-fast);
+}
+.controls-tab:hover{ color: var(--dg-text); }
+.controls-tab.is-active{
+  background: var(--dg-panel-2);
+  color: var(--dg-text);
+  box-shadow: 0 0 0 1px var(--dg-border-soft) inset;
+}
+
 .controls-legend{
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
   gap:10px;
-  margin-top:4px;
 }
+.controls-legend[hidden]{ display:none; }
 .key-chip{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   background: var(--dg-panel-2);
   border:1px solid var(--dg-border-soft);
   border-radius: var(--dg-radius-md);
-  padding: 10px 12px;
+  padding: 11px 14px;
+  min-height:44px;
   font-size:13px;
   color: var(--dg-text-muted);
+  line-height:1.4;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 .key-chip b{
+  flex: none;
   font-family: var(--dg-font-mono);
   color: var(--dg-text);
   background: var(--dg-bg-alt);
   border:1px solid var(--dg-border);
   border-radius: var(--dg-radius-sm);
-  padding: 3px 7px;
+  padding: 5px 8px;
   font-size:12px;
   min-width: 30px;
   text-align:center;
+  white-space:nowrap;
+}
+.key-chip span{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  column-gap:5px;
+  word-break: keep-all;
+}
+.key-chip em{
+  font-style:normal;
+  color: var(--dg-text-faint);
+  font-size:12px;
 }
 
 /* ============================================================
@@ -482,21 +529,24 @@ body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
     </div>
 
     <div class="panel">
-      <p class="section-label">조작 · 키보드</p>
-      <div class="controls-legend">
-        <div class="key-chip"><b>↑↓←→</b> 이동 (소리가 나요)</div>
-        <div class="key-chip"><b>S</b> 가만히 있기</div>
-        <div class="key-chip"><b>R</b> 안내 다시 듣기</div>
-        <div class="key-chip"><b>P</b> 일시정지</div>
-        <div class="key-chip"><b>H</b> 도움말</div>
+      <p class="section-label">조작 방법</p>
+      <div class="controls-tabs" role="tablist" aria-label="조작 방식 선택">
+        <button class="controls-tab is-active" type="button" role="tab" aria-selected="true" data-controls-panel="keyboard">키보드</button>
+        <button class="controls-tab" type="button" role="tab" aria-selected="false" data-controls-panel="dotpad">닷패드</button>
       </div>
-      <p class="section-label" style="margin-top:14px;">조작 · 닷패드</p>
-      <div class="controls-legend">
-        <div class="key-chip"><b>F1~F4</b> 상/하/좌/우 이동</div>
-        <div class="key-chip"><b>Pan 전체</b> 가만히 있기</div>
-        <div class="key-chip"><b>Pan 좌</b> 안내 다시 듣기</div>
-        <div class="key-chip"><b>Pan 우</b> 도움말</div>
-        <div class="key-chip"><b>LPF1</b> 일시정지</div>
+      <div class="controls-legend" data-controls-panel="keyboard">
+        <div class="key-chip"><b>↑↓←→</b><span>이동<em>(소리가 나요)</em></span></div>
+        <div class="key-chip"><b>S</b><span>가만히 있기</span></div>
+        <div class="key-chip"><b>R</b><span>안내 다시 듣기</span></div>
+        <div class="key-chip"><b>P</b><span>일시정지</span></div>
+        <div class="key-chip"><b>H</b><span>도움말</span></div>
+      </div>
+      <div class="controls-legend" data-controls-panel="dotpad" hidden>
+        <div class="key-chip"><b>F1~F4</b><span>상/하/좌/우 이동</span></div>
+        <div class="key-chip"><b>Pan 전체</b><span>가만히 있기</span></div>
+        <div class="key-chip"><b>Pan 좌</b><span>안내 다시 듣기</span></div>
+        <div class="key-chip"><b>Pan 우</b><span>도움말</span></div>
+        <div class="key-chip"><b>LPF1</b><span>일시정지</span></div>
       </div>
     </div>
 
@@ -1475,6 +1525,23 @@ function init(){
       this.classList.add("is-selected");
       this.setAttribute("aria-pressed", "true");
       selectedRounds = parseInt(this.getAttribute("data-rounds"), 10);
+    });
+  }
+
+  var controlsTabs = document.querySelectorAll(".controls-tab");
+  var controlsPanels = document.querySelectorAll(".controls-legend");
+  for (var t = 0; t < controlsTabs.length; t++){
+    controlsTabs[t].addEventListener("click", function(){
+      var target = this.getAttribute("data-controls-panel");
+      for (var k = 0; k < controlsTabs.length; k++){
+        controlsTabs[k].classList.remove("is-active");
+        controlsTabs[k].setAttribute("aria-selected", "false");
+      }
+      this.classList.add("is-active");
+      this.setAttribute("aria-selected", "true");
+      for (var m = 0; m < controlsPanels.length; m++){
+        controlsPanels[m].hidden = controlsPanels[m].getAttribute("data-controls-panel") !== target;
+      }
     });
   }
 
