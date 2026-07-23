@@ -474,10 +474,10 @@ body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
     <div class="panel">
       <p class="section-label">난이도 선택</p>
       <div class="choice-grid" id="difficulty-grid" role="group" aria-label="난이도 선택">
-        <button class="choice-btn" data-rounds="0" type="button"><strong>연습</strong><span>시간 제한 없음 · AI 느림</span></button>
-        <button class="choice-btn is-selected" data-rounds="10" type="button"><strong>10라운드</strong><span>짧게 한 판</span></button>
-        <button class="choice-btn" data-rounds="15" type="button"><strong>15라운드</strong><span>기본</span></button>
-        <button class="choice-btn" data-rounds="20" type="button"><strong>20라운드</strong><span>새벽까지 버티기</span></button>
+        <button class="choice-btn" data-rounds="0" type="button" aria-pressed="false"><strong>연습</strong><span>시간 제한 없음 · AI 느림</span></button>
+        <button class="choice-btn is-selected" data-rounds="10" type="button" aria-pressed="true"><strong>10라운드</strong><span>짧게 한 판</span></button>
+        <button class="choice-btn" data-rounds="15" type="button" aria-pressed="false"><strong>15라운드</strong><span>기본</span></button>
+        <button class="choice-btn" data-rounds="20" type="button" aria-pressed="false"><strong>20라운드</strong><span>새벽까지 버티기</span></button>
       </div>
     </div>
 
@@ -532,7 +532,7 @@ body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
     <div class="game-layout">
       <div>
         <div class="tactile-preview" id="tactile-preview" role="img" aria-label="촉각 미리보기: 내 위치와 방금 느껴진 발소리 위치"></div>
-        <div class="dpad" aria-hidden="true">
+        <div class="dpad">
           <button class="dpad-up" data-dir="up" type="button" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
           <button class="dpad-left" data-dir="left" type="button" aria-label="왼쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 5 5 12 12 19"/></svg></button>
           <button class="dpad-stay" data-action="stay" type="button" aria-label="가만히 있기"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/></svg></button>
@@ -577,10 +577,10 @@ body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
 <!-- ============================================================
      오버레이: 일시정지
      ============================================================ -->
-<div class="overlay" id="overlay-pause" hidden>
+<div class="overlay" id="overlay-pause" role="dialog" aria-modal="true" aria-labelledby="pause-title" aria-describedby="pause-sub" tabindex="-1" hidden>
   <div class="panel overlay-card">
-    <h2 class="overlay-title">일시정지</h2>
-    <p class="overlay-sub">숨은 여전히 죽이고 있어요. 준비되면 이어하기.</p>
+    <h2 class="overlay-title" id="pause-title">일시정지</h2>
+    <p class="overlay-sub" id="pause-sub">숨은 여전히 죽이고 있어요. 준비되면 이어하기.</p>
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-resume" type="button">이어하기</button>
       <button class="btn btn-ghost" id="btn-quit-title" type="button">그만하기</button>
@@ -591,7 +591,7 @@ body.embed .pinwrap, body.embed #btn-pin-toggle{ display:none; }
 <!-- ============================================================
      오버레이: 결과
      ============================================================ -->
-<div class="overlay" id="overlay-results" hidden>
+<div class="overlay" id="overlay-results" role="dialog" aria-modal="true" aria-labelledby="result-title" aria-describedby="result-sub" tabindex="-1" hidden>
   <div class="panel overlay-card">
     <div class="footprint-trail" aria-hidden="true">
       <svg viewBox="0 0 22 30"><path class="footprint" d="M11 2c-3 0-4 3-4 6s1 5 4 5 4-2 4-5-1-6-4-6zM6 12c-2.4 0-4 2.6-4 6.5S3.6 26 6.4 26c2.3 0 3.6-2 3.6-5.6C10 16 8.4 12 6 12z"/></svg>
@@ -1131,6 +1131,13 @@ function updateNarrative(noiseThisTurn){
       line = "조용해요… 발소리가 그대로예요.";
     }
   }
+
+  // 라운드 진행을 5라운드마다 짚어줌(끝 라운드는 종료 안내가 바로 이어지므로 생략해 겹치지 않게 함)
+  var isFinalRound = state.roundsTotal > 0 && state.round >= state.roundsTotal;
+  if (state.round > 0 && state.round % 5 === 0 && !isFinalRound){
+    line = state.round + "라운드째예요. " + line;
+  }
+
   speak(line, { assertive: urgent });
   state.prevDistance = newDist;
 }
@@ -1167,6 +1174,37 @@ function setBest(key, val){
 var hudRoundEl, hudRoundTotalEl, hudBestEl, tensionFillEl;
 var overlayPause, overlayResults, resultTitleEl, resultSubEl, resultRoundsEl, resultBestEl;
 var tileEls = [];
+
+var lastFocusedBeforeDialog = null;
+
+function openDialog(el){
+  lastFocusedBeforeDialog = document.activeElement;
+  el.hidden = false;
+  try{ el.focus(); }catch(e){}
+}
+
+function closeDialog(el, focusTarget){
+  el.hidden = true;
+  var target = focusTarget || lastFocusedBeforeDialog;
+  if (target && typeof target.focus === "function"){
+    try{ target.focus(); }catch(e){}
+  }
+}
+
+function getFocusableIn(el){
+  return el.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+}
+
+function trapDialogFocus(e){
+  if (e.key !== "Tab") return;
+  var open = (overlayPause && !overlayPause.hidden) ? overlayPause : ((overlayResults && !overlayResults.hidden) ? overlayResults : null);
+  if (!open) return;
+  var focusables = getFocusableIn(open);
+  if (!focusables.length) return;
+  var first = focusables[0], last = focusables[focusables.length - 1];
+  if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+}
 
 function showScreen(id){
   var all = document.querySelectorAll(".screen");
@@ -1219,7 +1257,7 @@ function showResults(caught, survived, best){
   resultSubEl.textContent = caught ? "그래도 " + survived + "라운드나 숨죽였어요." : "끝까지 들키지 않았어요.";
   resultRoundsEl.textContent = survived;
   resultBestEl.textContent = best;
-  overlayResults.hidden = false;
+  openDialog(overlayResults);
 }
 
 /* ============================================================
@@ -1234,27 +1272,35 @@ function togglePause(){
   state.paused = !state.paused;
   if (state.paused){
     AudioEngine.setBreathing(false);
-    overlayPause.hidden = false;
+    openDialog(overlayPause);
   } else {
-    overlayPause.hidden = true;
+    closeDialog(overlayPause);
   }
 }
 
 function endGame(caught){
   state.gameOver = true;
   AudioEngine.setBreathing(false);
+
+  var key = bestKey();
+  var prevBest = getBest(key);
+  var survived = state.round;
+  var isNewBest = survived > prevBest;
+  var best = isNewBest ? survived : prevBest;
+  if (isNewBest) setBest(key, survived);
+
+  var line;
   if (caught){
     AudioEngine.sting("caught");
-    speak("들켰어요…", { assertive: true });
+    line = "들켰어요… " + survived + "라운드 버텼어요.";
   } else {
     AudioEngine.sting("dawn");
-    speak(state.roundsTotal > 0 ? "새벽이 밝았어요. 살았어요!" : "정말 오래 버텼어요!", { assertive: true });
+    line = (state.roundsTotal > 0 ? "새벽이 밝았어요. 살았어요! " : "정말 오래 버텼어요! ") + survived + "라운드를 버텼어요.";
   }
+  line += isNewBest ? " 최고 기록이에요!" : (" 최고 기록은 " + best + "라운드예요.");
+  speak(line, { assertive: true });
+
   DotPad.pulse(caught ? 2 : 3);
-  var key = bestKey();
-  var best = getBest(key);
-  var survived = state.round;
-  if (survived > best){ setBest(key, survived); best = survived; }
   render();
   showResults(caught, survived, best);
   postToHost("gameover", { caught: caught, rounds: survived });
@@ -1422,8 +1468,12 @@ function init(){
   var diffButtons = document.querySelectorAll("#difficulty-grid .choice-btn");
   for (var i = 0; i < diffButtons.length; i++){
     diffButtons[i].addEventListener("click", function(){
-      for (var j = 0; j < diffButtons.length; j++){ diffButtons[j].classList.remove("is-selected"); }
+      for (var j = 0; j < diffButtons.length; j++){
+        diffButtons[j].classList.remove("is-selected");
+        diffButtons[j].setAttribute("aria-pressed", "false");
+      }
       this.classList.add("is-selected");
+      this.setAttribute("aria-pressed", "true");
       selectedRounds = parseInt(this.getAttribute("data-rounds"), 10);
     });
   }
@@ -1441,19 +1491,21 @@ function init(){
   document.getElementById("btn-resume").addEventListener("click", function(){ Game.dispatch("pause"); });
   document.getElementById("btn-quit-title").addEventListener("click", function(){
     state.paused = false;
-    overlayPause.hidden = true;
     AudioEngine.setBreathing(false);
     state.screen = "title";
     showScreen("screen-title");
+    closeDialog(overlayPause, document.getElementById("btn-start"));
   });
   document.getElementById("btn-retry").addEventListener("click", function(){
-    overlayResults.hidden = true;
+    closeDialog(overlayResults, null);
     startGame(state.roundsTotal);
+    var stayBtn2 = document.querySelector('.dpad [data-action="stay"]');
+    if (stayBtn2) stayBtn2.focus();
   });
   document.getElementById("btn-to-title").addEventListener("click", function(){
-    overlayResults.hidden = true;
     state.screen = "title";
     showScreen("screen-title");
+    closeDialog(overlayResults, document.getElementById("btn-start"));
   });
 
   var dotpadBtns = [document.getElementById("btn-dotpad-title"), document.getElementById("btn-dotpad-game")];
@@ -1478,6 +1530,8 @@ function init(){
   }
   var stayBtn = document.querySelector('.dpad [data-action="stay"]');
   if (stayBtn) stayBtn.addEventListener("click", function(){ Game.dispatch("stay"); });
+
+  document.addEventListener("keydown", trapDialogFocus);
 
   document.addEventListener("keydown", function(e){
     var map = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
