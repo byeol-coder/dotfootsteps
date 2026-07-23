@@ -661,7 +661,7 @@ button{ font-family:inherit; }
   <div class="cap">실제 핀 출력 (60×40)</div>
 </div>
 
-<script src="/tts.js"></script>
+<script src="./tts.js"></script>
 <script>
 (function(){
 "use strict";
@@ -846,19 +846,12 @@ var DotPad = (function(){
 var captionTextEl, liveAlertEl;
 var lastSpoken = "";
 var soundOn = true;
+// 정적 배포(github.io)엔 서버 음성(/api/tts)이 없고, tts.js는 iframe 안에서 inFrame() 체크로
+// 브라우저 폴백을 무조건 막아버림 — allowSpeechFallback 설정과 무관하게 무음 실패가 남.
+// 그래서 이 호스트에선 TW_TTS를 아예 거치지 않고 브라우저 음성으로 직행(지뢰찾기와 동일 패턴).
+var USE_BROWSER_VOICE = /(^|\.)github\.io$/.test(location.hostname);
 
-function speak(text, opts){
-  opts = opts || {};
-  lastSpoken = text;
-  if (captionTextEl) captionTextEl.textContent = text;
-  if (opts.assertive && liveAlertEl) liveAlertEl.textContent = text;
-  if (!soundOn) return; // 자막은 남기고 소리만 끔
-  try{
-    if (window.TW_TTS && typeof window.TW_TTS.speak === "function"){
-      window.TW_TTS.speak(text);
-      return;
-    }
-  }catch(e){}
+function speakBrowser(text){
   try{
     if ("speechSynthesis" in window){
       window.speechSynthesis.cancel();
@@ -867,6 +860,22 @@ function speak(text, opts){
       window.speechSynthesis.speak(u);
     }
   }catch(e){}
+}
+
+function speak(text, opts){
+  opts = opts || {};
+  lastSpoken = text;
+  if (captionTextEl) captionTextEl.textContent = text;
+  if (opts.assertive && liveAlertEl) liveAlertEl.textContent = text;
+  if (!soundOn) return; // 자막은 남기고 소리만 끔
+  if (USE_BROWSER_VOICE){ speakBrowser(text); return; }
+  try{
+    if (window.TW_TTS && typeof window.TW_TTS.speak === "function"){
+      window.TW_TTS.speak(text);
+      return;
+    }
+  }catch(e){}
+  speakBrowser(text);
 }
 function repeatLast(){ speak(lastSpoken || "아직 안내가 없어요."); }
 
@@ -1498,7 +1507,16 @@ async function handleConnectDotPad(){
 
 function init(){
   if (isEmbed) document.body.classList.add("embed");
-  if (window.TW_TTS) TW_TTS.setLang("ko");
+  if (window.TW_TTS){
+    try{
+      TW_TTS.setLang("ko");
+      // 정적 배포(github.io 등)엔 서버 음성(/api/tts)이 없고, tts.js는 iframe 안에서 브라우저 폴백을
+      // 기본적으로 막아버림 — 그대로 두면 "TW_TTS는 있는데 소리는 전혀 안 나는" 무음 실패가 생김.
+      // 지뢰찾기(dot-minesweeper)와 동일하게 폴백을 명시적으로 허용하고, github.io에선 서버 시도 자체를 건너뜀.
+      TW_TTS.config({ allowSpeechFallback: true });
+      if (/(^|\.)github\.io$/.test(location.hostname)) TW_TTS.config({ serverFirst: false });
+    }catch(e){}
+  }
 
   captionTextEl = document.getElementById("caption-text");
   liveAlertEl = document.getElementById("live-alert");
