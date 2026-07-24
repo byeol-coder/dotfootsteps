@@ -1063,8 +1063,8 @@ var AudioEngine = (function(){
     if (!enabled) setBreathing(false);
   }
 
-  // 심장박동 — 게임 내내 배경으로 재생되며, 거리에 따라 박동 속도·음량이 실시간으로 변함
-  var hbActive = false, hbTimer = null, hbDistance = MAX_DIST, hbMuffled = false;
+  // 심장박동 — 게임 내내 배경으로 재생되며, 위험도(거리 기반 공포 + 웅크림 위험 중 더 큰 쪽)에 실시간 반응
+  var hbActive = false, hbTimer = null, hbFear = 0, hbMuffled = false;
 
   function hbThump(vol){
     if (!enabled) return;
@@ -1091,15 +1091,15 @@ var AudioEngine = (function(){
 
   function hbLoop(){
     if (!hbActive) return;
-    var t = clamp(hbDistance, 0, MAX_DIST) / MAX_DIST; // 0=매우 가까움, 1=매우 멂
-    var interval = 380 + t * 900; // 가까우면 ~380ms, 멀면 ~1280ms
-    var vol = Math.max(0.035, (0.17 - t * 0.11)) * (hbMuffled ? 0.55 : 1);
+    var f = clamp(hbFear, 0, 1); // 0=평온, 1=최고조
+    var interval = 1280 - f * 900; // 평온하면 ~1280ms, 위험하면 ~380ms
+    var vol = Math.max(0.035, 0.06 + f * 0.11) * (hbMuffled ? 0.55 : 1);
     hbThump(vol);
     hbTimer = setTimeout(hbLoop, interval); // hbThump는 절대 throw하지 않으므로(위 try/catch) 항상 재예약됨
   }
 
-  function setHeartbeat(distance, muffled){
-    hbDistance = distance;
+  function setHeartbeat(fear, muffled){
+    hbFear = fear;
     hbMuffled = muffled;
     if (!hbActive){
       hbActive = true;
@@ -1300,7 +1300,14 @@ function updateNarrative(noiseThisTurn){
       line = (prevD > 2) ? "심장이 철렁해요! 바로 옆이에요." : "숨소리가 들려요… 바로 옆이에요.";
       urgent = true;
     } else if (campWarnDue){
-      line = "너무 오래 가만히 있으면 위험해요… 냄새를 맡을지도 몰라요.";
+      if (state.stayStreak >= 6){
+        line = "심장이 쿵쿵거려요… 더는 못 버틸 것 같아요!";
+        urgent = true;
+      } else if (state.stayStreak >= 4){
+        line = "너무 조용해요… 뭔가 다가오는 느낌이에요.";
+      } else {
+        line = "너무 오래 가만히 있으면 위험해요… 냄새를 맡을지도 몰라요.";
+      }
     } else if (prevD <= 1 && newDist >= 3){
       line = "가만히 있어… 지나갔어요.";
     } else if (newDist - prevD <= -2){
@@ -1328,7 +1335,13 @@ function updateAudioFeedback(){
   var muffled = !!bushAt(state.player);
   AudioEngine.footstep(pan, distance, muffled);
   AudioEngine.setBreathing(distance <= 1, pan, clamp(1 - distance / MAX_DIST, 0, 1));
-  AudioEngine.setHeartbeat(distance, muffled);
+
+  // 심장박동은 "물리적 거리"뿐 아니라 "웅크림으로 쌓인 위험"도 반영해야
+  // 몬스터가 멀리 있어도 가만히 있을수록 실제 위험을 귀로 느낄 수 있음.
+  var distFear = clamp(1 - distance / MAX_DIST, 0, 1);
+  var campFear = Math.min(1, Math.max(0, state.stayStreak - 1) * 0.2);
+  AudioEngine.setHeartbeat(Math.max(distFear, campFear), muffled);
+
   if (distance <= 1 && state.prevDistance > 2){
     AudioEngine.gasp(); // 갑자기 확 가까워진 순간의 놀람
   } else if (distance > 2 && state.alertTimer === 0 && Math.random() < 0.1){
@@ -1430,8 +1443,7 @@ function pushTactile(){ DotPad.render(encodePins(buildBitmap(state))); }
 
 function render(){
   hudRoundEl.textContent = state.round;
-  var dNow = dist(state.player, state.monster);
-  var tensionPct = clamp(100 - Math.round((dNow * 100) / MAX_DIST), 6, 100);
+  var tensionPct = clamp(Math.round(currentFear() * 100), 6, 100);
   tensionFillEl.style.width = tensionPct + "%";
   try{ renderTactilePreview(); }catch(e){}
   try{ pushTactile(); }catch(e){}
@@ -1453,6 +1465,13 @@ function speakRules(){
   speak("방향키로 움직이면 소리가 나서 위치가 들켜요. 가만히 있으면 안전하지만, 한자리에 너무 오래 웅크리면 오히려 냄새로 들킬 수 있어요. 덤불에 숨으면 더 안전하지만 소리도 잘 안 들려요. 발소리가 가까워지면 숨소리가 들려요.");
 }
 
+function currentFear(){
+  var distance = dist(state.player, state.monster);
+  var distFear = clamp(1 - distance / MAX_DIST, 0, 1);
+  var campFear = Math.min(1, Math.max(0, state.stayStreak - 1) * 0.2);
+  return Math.max(distFear, campFear);
+}
+
 function togglePause(){
   if (state.gameOver) return;
   state.paused = !state.paused;
@@ -1461,7 +1480,7 @@ function togglePause(){
     AudioEngine.stopHeartbeat();
     openDialog(overlayPause);
   } else {
-    AudioEngine.setHeartbeat(dist(state.player, state.monster), !!bushAt(state.player));
+    AudioEngine.setHeartbeat(currentFear(), !!bushAt(state.player));
     closeDialog(overlayPause);
   }
 }
@@ -1519,7 +1538,7 @@ function startGame(roundsTotal){
   hudBestEl.textContent = getBest(bestKey());
 
   AudioEngine.resume();
-  AudioEngine.setHeartbeat(state.prevDistance, !!bushAt(state.player));
+  AudioEngine.setHeartbeat(currentFear(), !!bushAt(state.player));
   speak("숨을 죽이세요. 발소리가 들리기 시작해요.");
   render();
 }
