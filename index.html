@@ -1290,32 +1290,54 @@ function updateNarrative(noiseThisTurn){
   var line, urgent = false;
 
   if (noiseThisTurn && onBush){
-    line = "덤불 속으로 숨었어요. 발소리가 조금 죽었어요.";
+    line = pickRandom([
+      "덤불 속으로 숨었어요. 발소리가 조금 죽었어요.",
+      "덤불 사이에 몸을 웅크렸어요.",
+      "잎사귀 속에 몸을 숨겼어요… 소리가 흐려져요."
+    ]);
   } else {
     var nearBush = adjacentBush(state.player);
     var campWarnDue = !noiseThisTurn && state.stayStreak > 0 && state.stayStreak % 2 === 0 && newDist > 1;
     if (nearBush && !onBush && newDist >= 4 && state.alertTimer === 0){
-      line = "지금이 기회예요! 덤불로 뛰어들 수 있어요.";
+      line = pickRandom([
+        "지금이 기회예요! 덤불로 뛰어들 수 있어요.",
+        "지금이라면 덤불까지 조용히 갈 수 있어요."
+      ]);
     } else if (newDist <= 1){
-      line = (prevD > 2) ? "심장이 철렁해요! 바로 옆이에요." : "숨소리가 들려요… 바로 옆이에요.";
+      line = (prevD > 2)
+        ? pickRandom(["심장이 철렁해요! 바로 옆이에요.", "헉— 바로 옆에 있어요!"])
+        : pickRandom(["숨소리가 들려요… 바로 옆이에요.", "여전히 바로 옆이에요… 숨을 참으세요."]);
       urgent = true;
     } else if (campWarnDue){
       if (state.stayStreak >= 6){
-        line = "심장이 쿵쿵거려요… 더는 못 버틸 것 같아요!";
+        line = pickRandom([
+          "심장이 쿵쿵거려요… 더는 못 버틸 것 같아요!",
+          "너무 오래 있었어요… 곧 들킬 것 같아요!"
+        ]);
         urgent = true;
       } else if (state.stayStreak >= 4){
-        line = "너무 조용해요… 뭔가 다가오는 느낌이에요.";
+        line = pickRandom([
+          "너무 조용해요… 뭔가 다가오는 느낌이에요.",
+          "등골이 서늘해요… 계속 여기 있어도 될까요?"
+        ]);
       } else {
-        line = "너무 오래 가만히 있으면 위험해요… 냄새를 맡을지도 몰라요.";
+        line = pickRandom([
+          "너무 오래 가만히 있으면 위험해요… 냄새를 맡을지도 몰라요.",
+          "슬슬 자리를 옮겨야 할 때예요."
+        ]);
       }
     } else if (prevD <= 1 && newDist >= 3){
-      line = "가만히 있어… 지나갔어요.";
+      line = pickRandom(["가만히 있어… 지나갔어요.", "휴… 눈치 못 채고 지나갔어요."]);
     } else if (newDist - prevD <= -2){
-      line = "발소리가 빠르게 가까워지고 있어요.";
+      line = pickRandom(["발소리가 빠르게 가까워지고 있어요.", "발소리가 성큼성큼 다가와요."]);
     } else if (newDist - prevD >= 2){
-      line = "발소리가 멀어지고 있어요.";
+      line = pickRandom(["발소리가 멀어지고 있어요.", "발소리가 점점 흐려져요."]);
     } else {
-      line = "조용해요… 발소리가 그대로예요.";
+      line = pickRandom([
+        "조용해요… 발소리가 그대로예요.",
+        "고요해요… 아직은 그대로예요.",
+        "발소리가 비슷한 거리에서 맴돌아요."
+      ]);
     }
   }
 
