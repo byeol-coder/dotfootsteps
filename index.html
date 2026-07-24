@@ -1245,21 +1245,24 @@ function stepMonster(){
   if (cand.length === 0) cand = neighbors(state.monster);
 
   var practice = state.roundsTotal === 0;
-  var greedyChance = practice ? 0.5 : 0.8;
+  var greedyChance = practice ? 0.6 : 0.88;
   // 라운드가 지날수록 오르는 "기본 위험도" — 웅크림 패턴 관리로 완전히 피할 수 없도록
-  // 캠핑 여부와 무관하게 확실히 누적되는 최소 위험선(바닥)을 훨씬 높게 잡음.
-  var senseBase = practice ? 0.04 : 0.10;
-  var senseSlope = practice ? 0.012 : 0.03;
-  var senseCap = practice ? 0.28 : 0.55;
+  // 캠핑 여부와 무관하게 확실히 누적되는 최소 위험선(바닥)을 훨씬 더 높게 잡음.
+  var senseBase = practice ? 0.08 : 0.16;
+  var senseSlope = practice ? 0.02 : 0.045;
+  var senseCap = practice ? 0.42 : 0.7;
   // 한자리에 계속 웅크릴수록(stayStreak) 발소리·냄새로 들킬 확률이 추가로 누적됨 —
   // 봐주는 턴을 1턴으로 줄여서 "2턴마다 한 번씩만 움직여 리셋"하는 패턴도 안전하지 않게 함.
-  var campBonus = Math.min(0.6, Math.max(0, state.stayStreak - 1) * (practice ? 0.07 : 0.11));
+  var campBonus = Math.min(0.65, Math.max(0, state.stayStreak - 1) * (practice ? 0.1 : 0.15));
+  // 덤불: 소리만 죽이는 게 아니라 실제로 발각 확률 자체를 낮춰서 진짜 전략적 의미를 갖게 함.
+  var bushGuard = bushAt(state.player) ? 0.55 : 1;
 
   var choice;
   if (state.alertTimer > 0 && state.lastNoise){
-    choice = (Math.random() < greedyChance) ? greedyTowards(cand, state.lastNoise) : pickRandom(cand);
+    var chaseChance = Math.min(0.95, greedyChance * (bushAt(state.player) ? 0.8 : 1));
+    choice = (Math.random() < chaseChance) ? greedyTowards(cand, state.lastNoise) : pickRandom(cand);
   } else {
-    var senseChance = Math.min(0.92, Math.min(senseCap, senseBase + state.round * senseSlope) + campBonus);
+    var senseChance = Math.min(0.95, (Math.min(senseCap, senseBase + state.round * senseSlope) + campBonus) * bushGuard);
     choice = (Math.random() < senseChance) ? greedyTowards(cand, state.player) : pickRandom(cand);
   }
   state.monsterPrev = prev;
