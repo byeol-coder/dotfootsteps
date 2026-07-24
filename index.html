@@ -909,30 +909,32 @@ var AudioEngine = (function(){
   // 발소리: 거리(dist)에 따라 피치/음량, 좌우 방향(pan)에 따라 스테레오 팬
   function footstep(pan, distance, muffled){
     if (!enabled) return;
-    var c = ensureCtx();
-    if (!c) return;
-    var now = c.currentTime;
-    var vol = clamp(1 - distance / MAX_DIST, 0.08, 1) * (muffled ? 0.55 : 1);
-    var freq = 180 + (1 - distance / MAX_DIST) * 340;
+    try{
+      var c = ensureCtx();
+      if (!c) return;
+      var now = c.currentTime;
+      var vol = clamp(1 - distance / MAX_DIST, 0.08, 1) * (muffled ? 0.55 : 1);
+      var freq = 180 + (1 - distance / MAX_DIST) * 340;
 
-    var osc = c.createOscillator();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(freq, now);
-    osc.frequency.exponentialRampToValueAtTime(Math.max(60, freq * 0.6), now + 0.09);
+      var osc = c.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(60, freq * 0.6), now + 0.09);
 
-    var gain = c.createGain();
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(vol, now + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+      var gain = c.createGain();
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(vol, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
 
-    var panner = (c.createStereoPanner) ? c.createStereoPanner() : null;
-    if (panner) panner.pan.setValueAtTime(clamp(pan, -1, 1), now);
+      var panner = (c.createStereoPanner) ? c.createStereoPanner() : null;
+      if (panner) panner.pan.setValueAtTime(clamp(pan, -1, 1), now);
 
-    osc.connect(gain);
-    if (panner){ gain.connect(panner); panner.connect(c.destination); }
-    else { gain.connect(c.destination); }
-    osc.start(now);
-    osc.stop(now + 0.16);
+      osc.connect(gain);
+      if (panner){ gain.connect(panner); panner.connect(c.destination); }
+      else { gain.connect(c.destination); }
+      osc.start(now);
+      osc.stop(now + 0.16);
+    }catch(e){}
   }
 
   function setBreathing(active, pan, intensity){
@@ -992,64 +994,68 @@ var AudioEngine = (function(){
 
   function sting(kind){
     if (!enabled) return;
-    var c = ensureCtx();
-    if (!c) return;
-    var now = c.currentTime;
-    if (kind === "caught"){
-      var osc = c.createOscillator();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(220, now);
-      osc.frequency.exponentialRampToValueAtTime(40, now + 0.6);
-      var g = c.createGain();
-      g.gain.setValueAtTime(0.28, now);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
-      osc.connect(g); g.connect(c.destination);
-      osc.start(now); osc.stop(now + 0.7);
-    } else if (kind === "dawn"){
-      [523.25, 659.25, 783.99].forEach(function(f, i){
+    try{
+      var c = ensureCtx();
+      if (!c) return;
+      var now = c.currentTime;
+      if (kind === "caught"){
         var osc = c.createOscillator();
-        osc.type = "sine";
-        osc.frequency.value = f;
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.6);
         var g = c.createGain();
-        var t0 = now + i * 0.12;
-        g.gain.setValueAtTime(0.0001, t0);
-        g.gain.exponentialRampToValueAtTime(0.16, t0 + 0.05);
-        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+        g.gain.setValueAtTime(0.28, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
         osc.connect(g); g.connect(c.destination);
-        osc.start(t0); osc.stop(t0 + 0.55);
-      });
-    } else if (kind === "denied"){
-      var osc2 = c.createOscillator();
-      osc2.type = "square";
-      osc2.frequency.value = 110;
-      var g2 = c.createGain();
-      g2.gain.setValueAtTime(0.12, now);
-      g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
-      osc2.connect(g2); g2.connect(c.destination);
-      osc2.start(now); osc2.stop(now + 0.1);
-    }
+        osc.start(now); osc.stop(now + 0.7);
+      } else if (kind === "dawn"){
+        [523.25, 659.25, 783.99].forEach(function(f, i){
+          var osc = c.createOscillator();
+          osc.type = "sine";
+          osc.frequency.value = f;
+          var g = c.createGain();
+          var t0 = now + i * 0.12;
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(0.16, t0 + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+          osc.connect(g); g.connect(c.destination);
+          osc.start(t0); osc.stop(t0 + 0.55);
+        });
+      } else if (kind === "denied"){
+        var osc2 = c.createOscillator();
+        osc2.type = "square";
+        osc2.frequency.value = 110;
+        var g2 = c.createGain();
+        g2.gain.setValueAtTime(0.12, now);
+        g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+        osc2.connect(g2); g2.connect(c.destination);
+        osc2.start(now); osc2.stop(now + 0.1);
+      }
+    }catch(e){}
   }
 
   // 플레이어 자신의 이동 소리 — 몬스터 발소리(tone)와 다른 음색(짧은 노이즈 틱)으로 구분
   function playerStep(){
     if (!enabled) return;
-    var c = ensureCtx();
-    if (!c) return;
-    var buf = getNoiseBuffer();
-    if (!buf) return;
-    var now = c.currentTime;
-    var src = c.createBufferSource();
-    src.buffer = buf;
-    var filter = c.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 900;
-    filter.Q.value = 2;
-    var gain = c.createGain();
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.22, now + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
-    src.connect(filter); filter.connect(gain); gain.connect(c.destination);
-    src.start(now); src.stop(now + 0.09);
+    try{
+      var c = ensureCtx();
+      if (!c) return;
+      var buf = getNoiseBuffer();
+      if (!buf) return;
+      var now = c.currentTime;
+      var src = c.createBufferSource();
+      src.buffer = buf;
+      var filter = c.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = 900;
+      filter.Q.value = 2;
+      var gain = c.createGain();
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.22, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+      src.connect(filter); filter.connect(gain); gain.connect(c.destination);
+      src.start(now); src.stop(now + 0.09);
+    }catch(e){}
   }
 
   function setEnabled(on){
@@ -1062,23 +1068,25 @@ var AudioEngine = (function(){
 
   function hbThump(vol){
     if (!enabled) return;
-    var c = ensureCtx();
-    if (!c) return;
-    var now = c.currentTime;
-    function beat(t, freq, peak, dur){
-      var osc = c.createOscillator();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, t);
-      osc.frequency.exponentialRampToValueAtTime(freq * 0.62, t + dur);
-      var g = c.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(peak, t + 0.015);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      osc.connect(g); g.connect(c.destination);
-      osc.start(t); osc.stop(t + dur + 0.02);
-    }
-    beat(now, 68, vol, 0.11);           // lub
-    beat(now + 0.15, 52, vol * 0.75, 0.13); // dub
+    try{
+      var c = ensureCtx();
+      if (!c) return;
+      var now = c.currentTime;
+      function beat(t, freq, peak, dur){
+        var osc = c.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.62, t + dur);
+        var g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(peak, t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(g); g.connect(c.destination);
+        osc.start(t); osc.stop(t + dur + 0.02);
+      }
+      beat(now, 68, vol, 0.11);           // lub
+      beat(now + 0.15, 52, vol * 0.75, 0.13); // dub
+    }catch(e){}
   }
 
   function hbLoop(){
@@ -1087,7 +1095,7 @@ var AudioEngine = (function(){
     var interval = 380 + t * 900; // 가까우면 ~380ms, 멀면 ~1280ms
     var vol = Math.max(0.035, (0.17 - t * 0.11)) * (hbMuffled ? 0.55 : 1);
     hbThump(vol);
-    hbTimer = setTimeout(hbLoop, interval);
+    hbTimer = setTimeout(hbLoop, interval); // hbThump는 절대 throw하지 않으므로(위 try/catch) 항상 재예약됨
   }
 
   function setHeartbeat(distance, muffled){
@@ -1108,43 +1116,47 @@ var AudioEngine = (function(){
   // 화들짝 — 거리가 갑자기 확 좁혀졌을 때(새로 인접해졌을 때) 순간적인 놀람 효과음
   function gasp(){
     if (!enabled) return;
-    var c = ensureCtx();
-    if (!c) return;
-    var now = c.currentTime;
-    var osc = c.createOscillator();
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(900, now);
-    osc.frequency.exponentialRampToValueAtTime(200, now + 0.18);
-    var g = c.createGain();
-    g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-    osc.connect(g); g.connect(c.destination);
-    osc.start(now); osc.stop(now + 0.25);
+    try{
+      var c = ensureCtx();
+      if (!c) return;
+      var now = c.currentTime;
+      var osc = c.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(900, now);
+      osc.frequency.exponentialRampToValueAtTime(200, now + 0.18);
+      var g = c.createGain();
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(now); osc.stop(now + 0.25);
+    }catch(e){}
   }
 
   // 애매한 삐걱 소리 — 몬스터와 무관하게 가끔 나는 정체불명의 소리(진짜 위험인지 알 수 없는 불안감)
   function creak(){
     if (!enabled) return;
-    var c = ensureCtx();
-    if (!c) return;
-    var now = c.currentTime;
-    var osc = c.createOscillator();
-    osc.type = "square";
-    var startF = 180 + Math.random() * 120;
-    osc.frequency.setValueAtTime(startF, now);
-    osc.frequency.linearRampToValueAtTime(startF * 0.5, now + 0.5);
-    var filt = c.createBiquadFilter();
-    filt.type = "lowpass"; filt.frequency.value = 500;
-    var g = c.createGain();
-    g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(0.05, now + 0.08);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
-    var panner = c.createStereoPanner ? c.createStereoPanner() : null;
-    osc.connect(filt); filt.connect(g);
-    if (panner){ g.connect(panner); panner.connect(c.destination); panner.pan.setValueAtTime((Math.random() * 2 - 1), now); }
-    else { g.connect(c.destination); }
-    osc.start(now); osc.stop(now + 0.6);
+    try{
+      var c = ensureCtx();
+      if (!c) return;
+      var now = c.currentTime;
+      var osc = c.createOscillator();
+      osc.type = "square";
+      var startF = 180 + Math.random() * 120;
+      osc.frequency.setValueAtTime(startF, now);
+      osc.frequency.linearRampToValueAtTime(startF * 0.5, now + 0.5);
+      var filt = c.createBiquadFilter();
+      filt.type = "lowpass"; filt.frequency.value = 500;
+      var g = c.createGain();
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.05, now + 0.08);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+      var panner = c.createStereoPanner ? c.createStereoPanner() : null;
+      osc.connect(filt); filt.connect(g);
+      if (panner){ g.connect(panner); panner.connect(c.destination); panner.pan.setValueAtTime((Math.random() * 2 - 1), now); }
+      else { g.connect(c.destination); }
+      osc.start(now); osc.stop(now + 0.6);
+    }catch(e){}
   }
 
   return {
@@ -1418,9 +1430,9 @@ function render(){
   var dNow = dist(state.player, state.monster);
   var tensionPct = clamp(100 - Math.round((dNow * 100) / MAX_DIST), 6, 100);
   tensionFillEl.style.width = tensionPct + "%";
-  renderTactilePreview();
-  pushTactile();
-  drawPin();
+  try{ renderTactilePreview(); }catch(e){}
+  try{ pushTactile(); }catch(e){}
+  try{ drawPin(); }catch(e){}
 }
 
 function showResults(caught, survived, best){
@@ -1532,14 +1544,15 @@ Game.dispatch = function(action, dir){
   state.round++;
 
   if (sameTile(state.player, state.monster)){
-    triggerMonsterFlash();
+    try{ triggerMonsterFlash(); }catch(e){}
     endGame(true);
     return;
   }
 
-  triggerMonsterFlash();
-  updateAudioFeedback();
-  updateNarrative(noiseThisTurn);
+  // 오디오/연출 쪽에서 혹시 예외가 나도 아래 render()·라운드종료 체크는 반드시 실행되도록 방어
+  try{ triggerMonsterFlash(); }catch(e){}
+  try{ updateAudioFeedback(); }catch(e){}
+  try{ updateNarrative(noiseThisTurn); }catch(e){}
   render();
 
   if (state.roundsTotal > 0 && state.round >= state.roundsTotal){
