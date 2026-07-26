@@ -1245,24 +1245,23 @@ function stepMonster(){
   if (cand.length === 0) cand = neighbors(state.monster);
 
   var practice = state.roundsTotal === 0;
-  var greedyChance = practice ? 0.6 : 0.88;
-  // 라운드가 지날수록 오르는 "기본 위험도" — 웅크림 패턴 관리로 완전히 피할 수 없도록
-  // 캠핑 여부와 무관하게 확실히 누적되는 최소 위험선(바닥)을 훨씬 더 높게 잡음.
-  var senseBase = practice ? 0.08 : 0.16;
-  var senseSlope = practice ? 0.02 : 0.045;
-  var senseCap = practice ? 0.42 : 0.7;
-  // 한자리에 계속 웅크릴수록(stayStreak) 발소리·냄새로 들킬 확률이 추가로 누적됨 —
-  // 봐주는 턴을 1턴으로 줄여서 "2턴마다 한 번씩만 움직여 리셋"하는 패턴도 안전하지 않게 함.
-  var campBonus = Math.min(0.65, Math.max(0, state.stayStreak - 1) * (practice ? 0.1 : 0.15));
-  // 덤불: 소리만 죽이는 게 아니라 실제로 발각 확률 자체를 낮춰서 진짜 전략적 의미를 갖게 함.
+  // "발소리" 게임답게 진짜 위험은 움직임(소리)에서 오도록: 이동 직후 추적 확률을 매우 높게.
+  var greedyChance = practice ? 0.72 : 0.95;
+  // 가만히 있을 때의 기본 위험도는 낮고 완만하게 — 오래 버틸수록 조금씩만 위험해짐.
+  var senseBase = practice ? 0.02 : 0.04;
+  var senseSlope = practice ? 0.008 : 0.018;
+  var senseCap = practice ? 0.2 : 0.34;
+  // 웅크림 페널티도 훨씬 관대하게(4턴까진 무료) — "가만히 있으면 안전"이 기본값이 되도록.
+  var campBonus = Math.min(0.4, Math.max(0, state.stayStreak - 4) * (practice ? 0.035 : 0.055));
+  // 덤불: 소리도 죽이고 발각 확률 자체도 낮춤(가만히 있을 때든 추적당할 때든 둘 다 유리).
   var bushGuard = bushAt(state.player) ? 0.55 : 1;
 
   var choice;
   if (state.alertTimer > 0 && state.lastNoise){
-    var chaseChance = Math.min(0.95, greedyChance * (bushAt(state.player) ? 0.8 : 1));
+    var chaseChance = Math.min(0.97, greedyChance * (bushAt(state.player) ? 0.75 : 1));
     choice = (Math.random() < chaseChance) ? greedyTowards(cand, state.lastNoise) : pickRandom(cand);
   } else {
-    var senseChance = Math.min(0.95, (Math.min(senseCap, senseBase + state.round * senseSlope) + campBonus) * bushGuard);
+    var senseChance = Math.min(0.85, (Math.min(senseCap, senseBase + state.round * senseSlope) + campBonus) * bushGuard);
     choice = (Math.random() < senseChance) ? greedyTowards(cand, state.player) : pickRandom(cand);
   }
   state.monsterPrev = prev;
@@ -1277,7 +1276,7 @@ function tryMove(dir){
   var next = { row: state.player.row + d[0], col: state.player.col + d[1] };
   if (!inBounds(next)) return { ok: false };
   state.player = next;
-  state.alertTimer = 3;
+  state.alertTimer = 4; // 발소리 여운이 더 오래감 — 움직임이 진짜 위험하다는 걸 체감시킴
   state.lastNoise = { row: next.row, col: next.col };
   state.stayStreak = 0;
   return { ok: true };
@@ -1297,7 +1296,8 @@ function updateNarrative(noiseThisTurn){
     ]);
   } else {
     var nearBush = adjacentBush(state.player);
-    var campWarnDue = !noiseThisTurn && state.stayStreak > 0 && state.stayStreak % 2 === 0 && newDist > 1;
+    var campWarnDue = !noiseThisTurn && state.stayStreak >= 4 && state.stayStreak % 2 === 0 && newDist > 1;
+    var movedIntoDanger = noiseThisTurn && newDist > 1;
     if (nearBush && !onBush && newDist >= 4 && state.alertTimer === 0){
       line = pickRandom([
         "지금이 기회예요! 덤불로 뛰어들 수 있어요.",
@@ -1308,14 +1308,20 @@ function updateNarrative(noiseThisTurn){
         ? pickRandom(["심장이 철렁해요! 바로 옆이에요.", "헉— 바로 옆에 있어요!"])
         : pickRandom(["숨소리가 들려요… 바로 옆이에요.", "여전히 바로 옆이에요… 숨을 참으세요."]);
       urgent = true;
+    } else if (movedIntoDanger){
+      line = pickRandom([
+        "발소리를 냈어요… 들켰을지도 몰라요.",
+        "방금 소리가 났어요. 조심하세요!",
+        "발소리가 울렸어요… 이쪽으로 올 수도 있어요."
+      ]);
     } else if (campWarnDue){
-      if (state.stayStreak >= 6){
+      if (state.stayStreak >= 8){
         line = pickRandom([
           "심장이 쿵쿵거려요… 더는 못 버틸 것 같아요!",
           "너무 오래 있었어요… 곧 들킬 것 같아요!"
         ]);
         urgent = true;
-      } else if (state.stayStreak >= 4){
+      } else if (state.stayStreak >= 6){
         line = pickRandom([
           "너무 조용해요… 뭔가 다가오는 느낌이에요.",
           "등골이 서늘해요… 계속 여기 있어도 될까요?"
@@ -1584,7 +1590,21 @@ Game.dispatch = function(action, dir){
     state.stayStreak++;
   } else { return; }
 
-  stepMonster();
+  // 발소리가 몬스터 근처에서 났다면 그 즉시 발각될 위험 — 여러 턴에 걸친 추격만으로는
+  // "계속 무작위로 움직이면 오히려 못 따라잡는" 역설이 생기므로, 소리 난 순간 자체의
+  // 즉각적인 위험을 별도로 반영한다.
+  var instantCaught = false;
+  if (noiseThisTurn){
+    var practice = state.roundsTotal === 0;
+    var dNow = dist(state.player, state.monster);
+    var instantChance = dNow <= 1 ? (practice ? 0.3 : 0.5) : (dNow === 2 ? (practice ? 0.12 : 0.24) : 0);
+    if (instantChance > 0 && Math.random() < instantChance){
+      state.monsterPrev = state.monster;
+      state.monster = { row: state.player.row, col: state.player.col };
+      instantCaught = true;
+    }
+  }
+  if (!instantCaught) stepMonster();
   state.round++;
 
   if (sameTile(state.player, state.monster)){
