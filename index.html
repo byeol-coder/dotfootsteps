@@ -621,8 +621,8 @@ button{ font-family:inherit; }
         <li><b>목표</b> — 선택한 라운드까지 살아남으면 탈출구가 열려요. 이후 3턴 안에 탈출구에 도착하세요.</li>
         <li><b>한 행동은 한 라운드</b> — 내가 이동하거나 듣기를 하면 몬스터도 반드시 한 칸 움직여요.</li>
         <li><b>이동</b> — 떠난 칸에 소리가 남고, 몬스터는 그 칸을 2턴 동안 추적해요. 확률로 즉사하지 않으며 같은 칸에서 만나면 잡혀요.</li>
-        <li><b>집중해서 듣기</b> — X자 점형으로 마지막 발소리 위치를 확인해요. 같은 자리에서 3번 연속 들으면 냄새가 짙어져 현재 위치를 추적당해요.</li>
-        <li><b>덤불</b> — 냄새 추적을 막아 주지만, 덤불 안에서는 발소리의 정확한 칸을 알 수 없어요.</li>
+        <li><b>집중해서 듣기</b> — X자 점형으로 마지막 발소리 위치를 확인해요. 같은 자리에서 3번 연속 들으면 잔향이 쌓여 몬스터가 내 위치를 포착해요.</li>
+        <li><b>덤불</b> — 발소리 잔향을 흡수하지만, 덤불 안에서는 발소리의 정확한 칸을 알 수 없어요.</li>
         <li><b>소리 미끼</b> — 한 판에 2번, 먼 칸에 소리를 내어 몬스터를 2턴 동안 유인할 수 있어요.</li>
         <li><b>X자 점형</b> — 몬스터의 현재 위치가 아니라 마지막으로 들은 위치예요. 다음 듣기 전까지 유지되며 몬스터는 그 뒤에 이동했을 수 있어요.</li>
       </ol>
@@ -686,7 +686,7 @@ button{ font-family:inherit; }
     </div>
     <div class="turn-status" aria-label="현재 상태">
       <span>거리 <b id="hud-distance">멀리</b></span>
-      <span>냄새 <b id="hud-scent">0/3</b></span>
+      <span>잔향 <b id="hud-resonance">0/3</b></span>
       <span>미끼 <b id="hud-decoys">2</b></span>
     </div>
 
@@ -1386,7 +1386,7 @@ var state = {
   paused: false,
   gameOver: false,
   stayStreak: 0,
-  scent: 0,
+  resonance: 0,
   decoys: 2,
   lastHeard: null,
   lastDecoy: null,
@@ -1437,7 +1437,7 @@ function stepMonster(){
   var choice;
   if (state.alertTimer > 0 && state.lastNoise){
     choice = greedyTowards(cand, state.lastNoise);
-  } else if (state.scent >= 3 && !bushAt(state.player)){
+  } else if (state.resonance >= 3 && !bushAt(state.player)){
     choice = greedyTowards(cand, state.player);
   } else {
     choice = pickRandom(cand);
@@ -1459,7 +1459,7 @@ function tryMove(dir){
   state.lastNoise = departed;
   state.lastDecoy = null;
   state.stayStreak = 0;
-  state.scent = 0;
+  state.resonance = 0;
   return { ok: true };
 }
 
@@ -1526,16 +1526,16 @@ function updateNarrative(action){
   } else if (action === "decoy"){
     line = "소리 미끼를 내 위치에서 " + relativePosition(state.player, state.lastDecoy) + "에 던졌어요. 네 점 점형으로 표시되며 몬스터가 2턴 동안 따라가요.";
   } else if (action === "move" && onBush){
-    line = "덤불 속으로 이동했어요. 이곳에서는 냄새 추적을 피하지만 정확한 발소리 칸은 알 수 없어요.";
+    line = "덤불 속으로 이동했어요. 잔향이 흡수돼 위치 포착을 피할 수 있지만 정확한 발소리 칸은 알 수 없어요.";
   } else if (action === "move"){
-    line = "떠난 칸에 발소리가 남았어요. 몬스터가 2턴 동안 그 칸을 추적해요." + (state.lastHeard ? " 마지막 발소리 X자는 현재 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "에 있어요." : "");
+    line = "발소리 흔적을 남겼어요. 몬스터가 2턴 동안 그 칸을 추적해요." + (state.lastHeard ? " 마지막 발소리 X자는 현재 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "에 있어요." : "");
   } else if (onBush){
     line = "덤불 때문에 정확한 칸은 알 수 없어요. " + directionOnly(state.player, state.monster) + "에서 " + distanceLabel(newDist) + " 발소리가 들려요.";
-  } else if (state.scent >= 3){
-    line = "냄새가 짙어졌어요! 몬스터가 지금 위치를 추적해요. 바로 이동하세요.";
+  } else if (state.resonance >= 3){
+    line = "진동 포착! 이 자리에 잔향이 쌓였어요. 몬스터가 내 위치를 향해 와요—지금 이동하세요.";
     urgent = true;
   } else {
-    line = "집중해서 들었어요. 마지막 발소리 X자는 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "이고, 현재 추정 거리는 " + distanceLabel(newDist) + "예요. 냄새 " + state.scent + "/3.";
+    line = "집중 완료. 마지막 발소리 X자는 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "이고, 현재 추정 거리는 " + distanceLabel(newDist) + "예요. 잔향 " + state.resonance + "/3.";
     if (newDist <= 1){
       urgent = true;
     }
@@ -1558,9 +1558,9 @@ function updateAudioFeedback(){
   AudioEngine.footstep(pan, distance, muffled);
   AudioEngine.setBreathing(distance <= 1, pan, clamp(1 - distance / MAX_DIST, 0, 1));
 
-  // 심장박동은 물리적 거리와 반복 듣기로 쌓인 냄새 위험을 함께 반영한다.
+  // 심장박동은 물리적 거리와 반복 듣기로 쌓인 잔향 위험을 함께 반영한다.
   var distFear = clamp(1 - distance / MAX_DIST, 0, 1);
-  var campFear = state.scent / 3;
+  var campFear = state.resonance / 3;
   AudioEngine.setHeartbeat(Math.max(distFear, campFear), muffled);
 
   if (distance <= 1 && state.prevDistance > 2){
@@ -1587,14 +1587,14 @@ function setBest(key, val){
 /* ============================================================
    7. DOM 렌더 / 화면 전환
    ============================================================ */
-var hudRoundEl, hudRoundTotalEl, hudBestEl, tensionFillEl, hudDistanceEl, hudScentEl, hudDecoysEl, decoyCountEl;
+var hudRoundEl, hudRoundTotalEl, hudBestEl, tensionFillEl, hudDistanceEl, hudResonanceEl, hudDecoysEl, decoyCountEl;
 var overlayPause, overlayResults, overlayTutorial, resultTitleEl, resultSubEl, resultRoundsEl, resultBestEl;
 var tileEls = [];
 var tutorialIndex = 0;
 var tutorialSteps = [
   { kind:"player", title:"내 위치", text:"중앙의 작은 채움 블록입니다. 손끝으로 작은 사각형을 확인하세요.", className:"is-player" },
   { kind:"sound", title:"마지막 발소리", text:"X자 점형입니다. 몬스터의 현재 위치가 아니라 마지막으로 들은 위치이며 다음 듣기까지 유지됩니다.", className:"is-last-heard" },
-  { kind:"bush", title:"덤불", text:"속이 빈 단일 테두리입니다. 냄새 추적을 막지만 정확한 발소리 칸은 들리지 않습니다.", className:"is-bush" },
+  { kind:"bush", title:"덤불", text:"속이 빈 단일 테두리입니다. 발소리 잔향을 흡수하지만 정확한 발소리 칸은 들리지 않습니다.", className:"is-bush" },
   { kind:"exit", title:"탈출구", text:"안과 밖에 선이 있는 이중 테두리입니다. 탈출 단계에서 이 점형으로 이동하세요.", className:"is-exit" },
   { kind:"decoy", title:"소리 미끼", text:"서로 떨어진 네 점입니다. 한 판에 두 번 몬스터를 다른 곳으로 유인할 수 있습니다.", className:"is-decoy" }
 ];
@@ -1676,7 +1676,7 @@ function render(){
   tensionFillEl.style.width = tensionPct + "%";
   var distance = dist(state.player, state.monster);
   hudDistanceEl.textContent = distanceLabel(distance);
-  hudScentEl.textContent = state.scent + "/3";
+  hudResonanceEl.textContent = state.resonance + "/3";
   hudDecoysEl.textContent = state.decoys;
   decoyCountEl.textContent = state.decoys;
   document.getElementById("btn-decoy").disabled = state.decoys <= 0 || state.exitActive;
@@ -1691,7 +1691,7 @@ function showResults(caught, survived, best, cause){
   resultTitleEl.textContent = caught ? "들켰어요…" : (state.roundsTotal > 0 ? "새벽이 밝았어요" : "정말 오래 버텼어요");
   var causeText = {
     chase: "떠난 칸의 소리를 추적한 몬스터와 같은 칸에서 마주쳤어요.",
-    scent: "같은 자리에서 세 번 들어 냄새로 현재 위치를 추적당했어요.",
+    resonance: "같은 자리에서 반복해 들은 진동을 몬스터가 포착했어요.",
     contact: "이동한 칸에서 몬스터와 마주쳤어요.",
     timeout: "탈출구가 닫히기 전에 도착하지 못했어요."
   }[cause];
@@ -1708,13 +1708,13 @@ function showResults(caught, survived, best, cause){
    8. 턴 해석 / 게임 시작·종료 / 일시정지
    ============================================================ */
 function speakRules(){
-  speak("한 번 행동하면 몬스터도 한 칸 움직여요. 이동하면 떠난 칸에 소리가 남아 몬스터가 두 턴 동안 그 칸을 추적해요. 집중해서 들으면 X자 점형과 방향, 칸 수로 마지막 발소리 위치를 알 수 있지만, 같은 자리에서 세 번 들으면 냄새로 현재 위치를 추적당해요. 덤불은 단일 테두리 점형이며 냄새 추적을 막지만 정확한 발소리 칸을 들을 수 없어요. 소리 미끼는 네 점 점형이고 두 번 사용할 수 있어요. 선택한 라운드까지 살아남으면 이중 테두리 탈출구가 열리고, 세 턴 안에 도착해야 해요. 몬스터와 같은 칸에서 만나면 잡혀요.");
+  speak("한 번 행동하면 몬스터도 한 칸 움직여요. 이동하면 떠난 칸에 발소리 흔적이 남아 몬스터가 두 턴 동안 그 칸을 추적해요. 집중해서 들으면 X자 점형과 방향, 칸 수로 마지막 발소리 위치를 알 수 있지만, 같은 자리에서 세 번 들으면 잔향이 쌓여 몬스터가 내 위치를 포착해요. 덤불은 단일 테두리 점형이며 발소리 잔향을 흡수하지만 정확한 발소리 칸은 들을 수 없어요. 소리 미끼는 네 점 점형이고 두 번 사용할 수 있어요. 선택한 라운드까지 살아남으면 이중 테두리 탈출구가 열리고, 세 턴 안에 도착해야 해요. 몬스터와 같은 칸에서 만나면 잡혀요.");
 }
 
 function currentFear(){
   var distance = dist(state.player, state.monster);
   var distFear = clamp(1 - distance / MAX_DIST, 0, 1);
-  var campFear = state.scent / 3;
+  var campFear = state.resonance / 3;
   return Math.max(distFear, campFear);
 }
 
@@ -1745,7 +1745,7 @@ function endGame(caught, cause){
 
   var causeSpoken = {
     chase: "떠난 칸의 소리를 추적한 몬스터와 마주쳤어요.",
-    scent: "냄새로 현재 위치를 추적당했어요.",
+    resonance: "반복해서 들은 진동을 몬스터가 포착했어요.",
     contact: "이동한 칸에서 몬스터와 마주쳤어요.",
     timeout: "탈출구가 닫혔어요."
   }[cause];
@@ -1783,7 +1783,7 @@ function startGame(roundsTotal){
   state.paused = false;
   state.gameOver = false;
   state.stayStreak = 0;
-  state.scent = 0;
+  state.resonance = 0;
   state.decoys = 2;
   state.lastHeard = null;
   state.lastDecoy = null;
@@ -1854,7 +1854,7 @@ function deployDecoy(){
   state.lastNoise = pickRandom(candidates);
   state.lastDecoy = { row:state.lastNoise.row, col:state.lastNoise.col };
   state.alertTimer = 2;
-  state.scent = 0;
+  state.resonance = 0;
   state.stayStreak = 0;
   return true;
 }
@@ -1878,7 +1878,7 @@ Game.dispatch = function(action, dir){
     action = "listen";
     actionLabel = "듣기";
     state.stayStreak++;
-    state.scent = Math.min(3, state.scent + 1);
+    state.resonance = Math.min(3, state.resonance + 1);
     state.lastHeard = bushAt(state.player) ? null : { row:state.monster.row, col:state.monster.col };
   } else if (action === "decoy"){
     if (state.exitActive){ speak("탈출구가 열렸어요. 지금은 이동해야 해요."); return; }
@@ -1899,7 +1899,7 @@ Game.dispatch = function(action, dir){
 
   if (sameTile(state.player, state.monster)){
     try{ triggerMonsterFlash(); }catch(e){}
-    var catchCause = state.scent >= 3 && !bushAt(state.player) ? "scent" : (wasChasing ? "chase" : "contact");
+    var catchCause = state.resonance >= 3 && !bushAt(state.player) ? "resonance" : (wasChasing ? "chase" : "contact");
     endGame(true, catchCause);
     return;
   }
@@ -2018,7 +2018,7 @@ function init(){
   hudBestEl = document.getElementById("hud-best");
   tensionFillEl = document.getElementById("tension-fill");
   hudDistanceEl = document.getElementById("hud-distance");
-  hudScentEl = document.getElementById("hud-scent");
+  hudResonanceEl = document.getElementById("hud-resonance");
   hudDecoysEl = document.getElementById("hud-decoys");
   decoyCountEl = document.getElementById("decoy-count");
   overlayPause = document.getElementById("overlay-pause");
