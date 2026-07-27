@@ -720,11 +720,11 @@ button{ font-family:inherit; }
       <div>
         <div class="tactile-preview" id="tactile-preview" role="img" aria-label="촉각 미리보기: 내 위치, 덤불, 마지막으로 들은 발소리와 탈출구"></div>
         <div class="tactile-legend" aria-hidden="true">
-          <span><i class="tile is-player"></i>나</span>
-          <span><i class="tile is-bush"></i>덤불</span>
-          <span><i class="tile is-last-heard"></i>마지막 발소리(X)</span>
-          <span><i class="tile is-exit"></i>탈출구</span>
-          <span><i class="tile is-decoy"></i>소리 미끼</span>
+          <span id="legend-player"><i class="tile is-player"></i>나</span>
+          <span id="legend-bush"><i class="tile is-bush"></i>덤불</span>
+          <span id="legend-heard"><i class="tile is-last-heard"></i>마지막 발소리(X)</span>
+          <span id="legend-exit"><i class="tile is-exit"></i>탈출구</span>
+          <span id="legend-decoy"><i class="tile is-decoy"></i>소리 미끼</span>
         </div>
         <div class="dpad">
           <button class="dpad-up" data-dir="up" type="button" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
@@ -1750,6 +1750,9 @@ function render(){
   document.getElementById("status-decoys").hidden = !state.features.decoy;
   document.getElementById("btn-decoy").hidden = !state.features.decoy;
   document.getElementById("btn-decoy").disabled = !state.features.decoy || state.decoys <= 0 || state.exitActive;
+  document.getElementById("legend-bush").hidden = !state.features.bushes;
+  document.getElementById("legend-exit").hidden = !state.features.exit;
+  document.getElementById("legend-decoy").hidden = !state.features.decoy;
   document.querySelector(".tension-track").setAttribute("aria-label", "위험도, 몬스터 추정 거리 " + distanceLabel(distance));
   document.getElementById("tactile-preview").setAttribute("aria-label", describeTactileMap());
   try{ renderTactilePreview(); }catch(e){}
@@ -1758,7 +1761,8 @@ function render(){
 }
 
 function showResults(caught, survived, best, cause){
-  resultTitleEl.textContent = caught ? "들켰어요…" : (state.roundsTotal > 0 ? "새벽이 밝았어요" : "정말 오래 버텼어요");
+  var isBasicComplete = !caught && state.features && state.features.label === "기본";
+  resultTitleEl.textContent = caught ? "들켰어요…" : (isBasicComplete ? "기본 훈련 완료!" : (state.roundsTotal > 0 ? "새벽이 밝았어요" : "정말 오래 버텼어요"));
   var causeText = {
     chase: "떠난 칸의 소리를 추적한 몬스터와 같은 칸에서 마주쳤어요.",
     resonance: "같은 자리에서 반복해 들은 진동을 몬스터가 포착했어요.",
@@ -1768,7 +1772,7 @@ function showResults(caught, survived, best, cause){
   var replay = state.history.slice(-2).join(" → ");
   resultSubEl.textContent = caught
     ? (causeText || "몬스터와 같은 칸에서 마주쳤어요.") + (replay ? " 마지막 행동: " + replay : "")
-    : "탈출구에 도착했어요. 마지막 위치를 기억하고 추적을 따돌렸습니다.";
+    : (isBasicComplete ? survived + "라운드를 버텼어요. 덤불과 잔향을 익혔어요." : "탈출구에 도착했어요. 마지막 위치를 기억하고 추적을 따돌렸습니다.");
   resultRoundsEl.textContent = survived;
   resultBestEl.textContent = best;
   openDialog(overlayResults);
@@ -1832,6 +1836,9 @@ function endGame(caught, cause){
   if (caught){
     AudioEngine.sting("caught");
     line = "들켰어요… " + (causeSpoken || "") + " " + survived + "라운드 버텼어요.";
+  } else if (state.features && state.features.label === "기본") {
+    AudioEngine.sting("dawn");
+    line = "기본 훈련 완료! " + survived + "라운드를 버텼어요. 덤불과 잔향을 익혔어요.";
   } else {
     AudioEngine.sting("dawn");
     line = (state.roundsTotal > 0 ? "새벽이 밝았어요. 살았어요! " : "정말 오래 버텼어요! ") + survived + "라운드를 버텼어요.";
