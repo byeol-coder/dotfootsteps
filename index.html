@@ -569,7 +569,7 @@ button{ font-family:inherit; }
     <div class="panel">
       <p class="section-label">난이도 선택</p>
       <div class="choice-grid" id="difficulty-grid" role="group" aria-label="난이도 선택">
-        <button class="choice-btn" data-rounds="0" type="button" aria-pressed="false"><strong>연습</strong><span>시간 제한 없음 · AI 느림</span></button>
+        <button class="choice-btn" data-rounds="0" type="button" aria-pressed="false"><strong>연습</strong><span>시간 제한 없음 · 규칙 익히기</span></button>
         <button class="choice-btn is-selected" data-rounds="10" type="button" aria-pressed="true"><strong>10라운드</strong><span>짧게 한 판</span></button>
         <button class="choice-btn" data-rounds="15" type="button" aria-pressed="false"><strong>15라운드</strong><span>기본</span></button>
         <button class="choice-btn" data-rounds="20" type="button" aria-pressed="false"><strong>20라운드</strong><span>새벽까지 버티기</span></button>
@@ -649,7 +649,7 @@ button{ font-family:inherit; }
 
     <div class="game-layout">
       <div>
-        <div class="tactile-preview" id="tactile-preview" role="img" aria-label="촉각 미리보기: 내 위치와 방금 느껴진 발소리 위치"></div>
+        <div class="tactile-preview" id="tactile-preview" role="img" aria-label="촉각 미리보기: 내 위치, 덤불, 마지막으로 들은 발소리와 탈출구"></div>
         <div class="tactile-legend" aria-hidden="true">
           <span><i class="tile is-player"></i>나</span>
           <span><i class="tile is-bush"></i>덤불</span>
@@ -1412,8 +1412,7 @@ function updateAudioFeedback(){
   AudioEngine.footstep(pan, distance, muffled);
   AudioEngine.setBreathing(distance <= 1, pan, clamp(1 - distance / MAX_DIST, 0, 1));
 
-  // 심장박동은 "물리적 거리"뿐 아니라 "웅크림으로 쌓인 위험"도 반영해야
-  // 몬스터가 멀리 있어도 가만히 있을수록 실제 위험을 귀로 느낄 수 있음.
+  // 심장박동은 물리적 거리와 반복 듣기로 쌓인 냄새 위험을 함께 반영한다.
   var distFear = clamp(1 - distance / MAX_DIST, 0, 1);
   var campFear = state.scent / 3;
   AudioEngine.setHeartbeat(Math.max(distFear, campFear), muffled);
