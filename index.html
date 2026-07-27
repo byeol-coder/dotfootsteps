@@ -413,11 +413,14 @@ button{ font-family:inherit; }
   border:1px dashed rgba(127,184,166,.5);
 }
 .tile.is-player{
-  background: var(--dg-safe);
+  background:linear-gradient(var(--dg-safe),var(--dg-safe)) center/42% 50% no-repeat, #1A1613;
   box-shadow: 0 0 0 2px var(--dg-panel), 0 0 14px rgba(127,184,166,.7);
 }
 .tile.is-player-bush{
-  background: var(--dg-safe-strong);
+  background:
+    linear-gradient(var(--dg-safe-strong),var(--dg-safe-strong)) center/42% 50% no-repeat,
+    repeating-linear-gradient(135deg, #1D2A21 0 4px, #19251D 4px 8px);
+  border-color:rgba(127,184,166,.55);
   box-shadow: 0 0 0 2px var(--dg-panel), 0 0 18px rgba(183,217,206,.6);
 }
 .tile.is-monster-flash{
@@ -425,10 +428,25 @@ button{ font-family:inherit; }
   border-color: var(--dg-danger);
   box-shadow: 0 0 16px rgba(226,71,43,.85);
 }
+.tile.is-last-heard{
+  background:
+    linear-gradient(45deg, transparent 43%, var(--dg-danger) 43% 57%, transparent 57%),
+    linear-gradient(-45deg, transparent 43%, var(--dg-danger) 43% 57%, transparent 57%),
+    #1A1613;
+  border-color:rgba(226,71,43,.55);
+}
 .tile.is-exit{
   background:transparent;
   border:2px solid var(--dg-safe-strong);
-  box-shadow:inset 0 0 0 3px var(--dg-bg-alt), 0 0 12px rgba(183,217,206,.45);
+  box-shadow:inset 0 0 0 3px var(--dg-bg-alt), inset 0 0 0 4px var(--dg-safe-strong), 0 0 12px rgba(183,217,206,.45);
+}
+.tile.is-decoy{
+  background:
+    radial-gradient(circle at 28% 28%, var(--dg-accent-strong) 0 7%, transparent 8%),
+    radial-gradient(circle at 72% 28%, var(--dg-accent-strong) 0 7%, transparent 8%),
+    radial-gradient(circle at 28% 72%, var(--dg-accent-strong) 0 7%, transparent 8%),
+    radial-gradient(circle at 72% 72%, var(--dg-accent-strong) 0 7%, transparent 8%),
+    #1A1613;
 }
 .tactile-legend{
   display:flex;
@@ -516,6 +534,27 @@ button{ font-family:inherit; }
   margin: 0 0 6px;
 }
 .overlay-sub{ color:var(--dg-text-muted); font-size:14px; margin:0 0 18px; }
+.tutorial-sample{
+  width:160px;
+  aspect-ratio:5/4;
+  margin:16px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--dg-bg-alt);
+  border:1px solid var(--dg-border);
+  border-radius:var(--dg-radius-lg);
+}
+.tutorial-sample .tile{
+  width:92px;
+  height:72px;
+}
+.tutorial-step{
+  font-family:var(--dg-font-mono);
+  color:var(--dg-text-faint);
+  font-size:12px;
+  margin:0;
+}
 .result-stats{
   display:flex;
   justify-content:center;
@@ -582,10 +621,10 @@ button{ font-family:inherit; }
         <li><b>목표</b> — 선택한 라운드까지 살아남으면 탈출구가 열려요. 이후 3턴 안에 탈출구에 도착하세요.</li>
         <li><b>한 행동은 한 라운드</b> — 내가 이동하거나 듣기를 하면 몬스터도 반드시 한 칸 움직여요.</li>
         <li><b>이동</b> — 떠난 칸에 소리가 남고, 몬스터는 그 칸을 2턴 동안 추적해요. 확률로 즉사하지 않으며 같은 칸에서 만나면 잡혀요.</li>
-        <li><b>집중해서 듣기</b> — 빨간 칸으로 마지막 발소리 위치를 확인해요. 같은 자리에서 3번 연속 들으면 냄새가 짙어져 현재 위치를 추적당해요.</li>
+        <li><b>집중해서 듣기</b> — X자 점형으로 마지막 발소리 위치를 확인해요. 같은 자리에서 3번 연속 들으면 냄새가 짙어져 현재 위치를 추적당해요.</li>
         <li><b>덤불</b> — 냄새 추적을 막아 주지만, 덤불 안에서는 발소리의 정확한 칸을 알 수 없어요.</li>
         <li><b>소리 미끼</b> — 한 판에 2번, 먼 칸에 소리를 내어 몬스터를 2턴 동안 유인할 수 있어요.</li>
-        <li><b>빨간 칸</b> — 몬스터의 현재 위치가 아니라 마지막으로 들은 위치예요. 몬스터는 그 뒤에 이동했을 수 있어요.</li>
+        <li><b>X자 점형</b> — 몬스터의 현재 위치가 아니라 마지막으로 들은 위치예요. 다음 듣기 전까지 유지되며 몬스터는 그 뒤에 이동했을 수 있어요.</li>
       </ol>
     </div>
 
@@ -622,6 +661,10 @@ button{ font-family:inherit; }
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="17" x2="12" y2="11"/><circle cx="12" cy="7.5" r=".6" fill="currentColor" stroke="none"/></svg>
         규칙 듣기
       </button>
+      <button class="btn btn-ghost" id="btn-tutorial" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 11h.01M12 11h.01M16 11h.01M8 14h.01M12 14h.01M16 14h.01"/></svg>
+        촉각 튜토리얼
+      </button>
       <button class="btn btn-ghost" id="btn-dotpad-title" type="button" aria-pressed="false">
         <svg class="icon" viewBox="0 0 24 24"><path d="M7 8l10 8l-5 4v-16l5 4l-10 8"/></svg>
         <span class="dp-label">닷패드 연결</span>
@@ -653,8 +696,9 @@ button{ font-family:inherit; }
         <div class="tactile-legend" aria-hidden="true">
           <span><i class="tile is-player"></i>나</span>
           <span><i class="tile is-bush"></i>덤불</span>
-          <span><i class="tile is-monster-flash"></i>마지막 발소리</span>
+          <span><i class="tile is-last-heard"></i>마지막 발소리(X)</span>
           <span><i class="tile is-exit"></i>탈출구</span>
+          <span><i class="tile is-decoy"></i>소리 미끼</span>
         </div>
         <div class="dpad">
           <button class="dpad-up" data-dir="up" type="button" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
@@ -712,6 +756,23 @@ button{ font-family:inherit; }
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-resume" type="button">이어하기</button>
       <button class="btn btn-ghost" id="btn-quit-title" type="button">그만하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     오버레이: 촉각 튜토리얼
+     ============================================================ -->
+<div class="overlay" id="overlay-tutorial" role="dialog" aria-modal="true" aria-labelledby="tutorial-title" aria-describedby="tutorial-sub" tabindex="-1" hidden>
+  <div class="panel overlay-card">
+    <p class="tutorial-step" id="tutorial-step">1 / 5</p>
+    <h2 class="overlay-title" id="tutorial-title">내 위치</h2>
+    <div class="tutorial-sample" aria-hidden="true"><i class="tile is-player" id="tutorial-pattern"></i></div>
+    <p class="overlay-sub" id="tutorial-sub">중앙의 작은 채움 블록입니다.</p>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-tutorial-prev" type="button">이전</button>
+      <button class="btn btn-primary" id="btn-tutorial-next" type="button">다음</button>
+      <button class="btn btn-ghost" id="btn-tutorial-close" type="button">닫기</button>
     </div>
   </div>
 </div>
@@ -804,10 +865,10 @@ function buildBitmap(state){
   var bmp = [];
   for (var y = 0; y < PIN_H; y++){ bmp.push(new Uint8Array(PIN_W)); }
 
-  function fillTile(t){
+  function playerMark(t){
     var x0 = t.col * TILE_W, y0 = t.row * TILE_H;
-    for (var y = 0; y < TILE_H; y++){
-      for (var x = 0; x < TILE_W; x++){ bmp[y0 + y][x0 + x] = 1; }
+    for (var y = 2; y <= 5; y++){
+      for (var x = 3; x <= 6; x++){ bmp[y0 + y][x0 + x] = 1; }
     }
   }
   function ringTile(t){
@@ -815,13 +876,51 @@ function buildBitmap(state){
     for (var x = 0; x < TILE_W; x++){ bmp[y0][x0 + x] = 1; bmp[y0 + TILE_H - 1][x0 + x] = 1; }
     for (var y = 0; y < TILE_H; y++){ bmp[y0 + y][x0] = 1; bmp[y0 + y][x0 + TILE_W - 1] = 1; }
   }
+  function doubleRingTile(t){
+    ringTile(t);
+    var x0 = t.col * TILE_W, y0 = t.row * TILE_H;
+    for (var x = 2; x <= TILE_W - 3; x++){ bmp[y0 + 2][x0 + x] = 1; bmp[y0 + TILE_H - 3][x0 + x] = 1; }
+    for (var y = 2; y <= TILE_H - 3; y++){ bmp[y0 + y][x0 + 2] = 1; bmp[y0 + y][x0 + TILE_W - 3] = 1; }
+  }
+  function crossTile(t){
+    var x0 = t.col * TILE_W, y0 = t.row * TILE_H;
+    for (var y = 1; y < TILE_H - 1; y++){
+      var x = Math.round((y - 1) * (TILE_W - 3) / (TILE_H - 3)) + 1;
+      bmp[y0 + y][x0 + x] = 1;
+      bmp[y0 + y][x0 + TILE_W - 1 - x] = 1;
+    }
+  }
+  function fourDotsTile(t){
+    var x0 = t.col * TILE_W, y0 = t.row * TILE_H;
+    [[2,2],[7,2],[2,5],[7,5]].forEach(function(p){ bmp[y0 + p[1]][x0 + p[0]] = 1; });
+  }
 
   state.bushes.forEach(ringTile);   // 덤불: 속이 빈 테두리 — 터치로 지형지물 구분
-  if (state.exitActive && state.exit){ ringTile(state.exit); }
-  fillTile(state.player);           // 나: 항상 꽉 찬 블록 (기준점)
-  if (state.monsterFlash && state.lastHeard){ fillTile(state.lastHeard); } // 마지막으로 들은 위치
+  if (state.exitActive && state.exit){ doubleRingTile(state.exit); }
+  if (state.lastDecoy && state.alertTimer > 0){ fourDotsTile(state.lastDecoy); }
+  if (state.lastHeard){ crossTile(state.lastHeard); }
+  if (!state.hidePlayer){ playerMark(state.player); } // 나: 중앙의 작은 채움 블록
 
   return bmp;
+}
+
+function buildTutorialBitmap(kind){
+  var center = { row:2, col:2 };
+  var demo = {
+    player:center,
+    bushes:[],
+    exitActive:false,
+    exit:null,
+    lastHeard:null,
+    lastDecoy:null,
+    alertTimer:0,
+    hidePlayer:kind !== "player"
+  };
+  if (kind === "sound") demo.lastHeard = center;
+  if (kind === "bush") demo.bushes = [center];
+  if (kind === "exit"){ demo.exitActive = true; demo.exit = center; }
+  if (kind === "decoy"){ demo.lastDecoy = center; demo.alertTimer = 2; }
+  return buildBitmap(demo);
 }
 
 /* ============================================================
@@ -1290,6 +1389,7 @@ var state = {
   scent: 0,
   decoys: 2,
   lastHeard: null,
+  lastDecoy: null,
   exit: null,
   exitActive: false,
   escapeTurns: 0,
@@ -1357,6 +1457,7 @@ function tryMove(dir){
   state.player = next;
   state.alertTimer = 2;
   state.lastNoise = departed;
+  state.lastDecoy = null;
   state.stayStreak = 0;
   state.scent = 0;
   return { ok: true };
@@ -1368,6 +1469,51 @@ function distanceLabel(distance){
   return "멀리";
 }
 
+function relativePosition(from, to){
+  if (!to) return "아직 확인되지 않음";
+  var parts = [];
+  var dr = to.row - from.row;
+  var dc = to.col - from.col;
+  if (dr < 0) parts.push("위쪽 " + Math.abs(dr) + "칸");
+  if (dr > 0) parts.push("아래쪽 " + dr + "칸");
+  if (dc < 0) parts.push("왼쪽 " + Math.abs(dc) + "칸");
+  if (dc > 0) parts.push("오른쪽 " + dc + "칸");
+  return parts.length ? parts.join(", ") : "현재 나와 같은 칸";
+}
+
+function directionOnly(from, to){
+  if (!to) return "알 수 없는 방향";
+  var dr = to.row - from.row;
+  var dc = to.col - from.col;
+  var parts = [];
+  if (dr < 0) parts.push("위쪽");
+  if (dr > 0) parts.push("아래쪽");
+  if (dc < 0) parts.push("왼쪽");
+  if (dc > 0) parts.push("오른쪽");
+  return parts.length ? parts.join("과 ") : "바로 이곳";
+}
+
+function gridPosition(t){
+  return "위에서 " + (t.row + 1) + "번째 행, 왼쪽에서 " + (t.col + 1) + "번째 열";
+}
+
+function describeTactileMap(){
+  var parts = ["촉각 지도. 내 위치 " + gridPosition(state.player) + "."];
+  if (state.bushes.length){
+    parts.push("덤불 " + state.bushes.map(gridPosition).join("; ") + ".");
+  }
+  if (state.lastHeard){
+    parts.push("마지막 발소리 X자 점형은 내 위치에서 " + relativePosition(state.player, state.lastHeard) + ".");
+  }
+  if (state.lastDecoy && state.alertTimer > 0){
+    parts.push("소리 미끼 네 점은 내 위치에서 " + relativePosition(state.player, state.lastDecoy) + ".");
+  }
+  if (state.exitActive && state.exit){
+    parts.push("탈출구 이중 테두리는 내 위치에서 " + relativePosition(state.player, state.exit) + ".");
+  }
+  return parts.join(" ");
+}
+
 function updateNarrative(action){
   var newDist = dist(state.player, state.monster);
   var onBush = !!bushAt(state.player);
@@ -1375,21 +1521,21 @@ function updateNarrative(action){
   var line, urgent = false;
 
   if (state.exitActive){
-    line = "탈출구가 열렸어요. " + state.escapeTurns + "턴 안에 빛나는 테두리 칸으로 이동하세요.";
+    line = "탈출구가 열렸어요. 내 위치에서 " + relativePosition(state.player, state.exit) + "에 있는 이중 테두리 점형으로 이동하세요. 남은 시간 " + state.escapeTurns + "턴.";
     urgent = state.escapeTurns <= 1;
   } else if (action === "decoy"){
-    line = "먼 곳에 소리 미끼를 던졌어요. 몬스터가 2턴 동안 그 소리를 따라가요.";
+    line = "소리 미끼를 내 위치에서 " + relativePosition(state.player, state.lastDecoy) + "에 던졌어요. 네 점 점형으로 표시되며 몬스터가 2턴 동안 따라가요.";
   } else if (action === "move" && onBush){
     line = "덤불 속으로 이동했어요. 이곳에서는 냄새 추적을 피하지만 정확한 발소리 칸은 알 수 없어요.";
   } else if (action === "move"){
-    line = "떠난 칸에 발소리가 남았어요. 몬스터가 2턴 동안 그 칸을 추적해요.";
+    line = "떠난 칸에 발소리가 남았어요. 몬스터가 2턴 동안 그 칸을 추적해요." + (state.lastHeard ? " 마지막 발소리 X자는 현재 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "예요." : "");
   } else if (onBush){
-    line = "덤불 때문에 발소리가 흐려요. 거리는 " + distanceLabel(newDist) + "예요.";
+    line = "덤불 때문에 정확한 칸은 알 수 없어요. " + directionOnly(state.player, state.monster) + "에서 " + distanceLabel(newDist) + " 발소리가 들려요.";
   } else if (state.scent >= 3){
     line = "냄새가 짙어졌어요! 몬스터가 지금 위치를 추적해요. 바로 이동하세요.";
     urgent = true;
   } else {
-    line = "집중해서 들었어요. 마지막 발소리는 빨간 칸이고, 현재 추정 거리는 " + distanceLabel(newDist) + "예요. 냄새 " + state.scent + "/3.";
+    line = "집중해서 들었어요. 마지막 발소리 X자는 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "이고, 현재 추정 거리는 " + distanceLabel(newDist) + "예요. 냄새 " + state.scent + "/3.";
     if (newDist <= 1){
       urgent = true;
     }
@@ -1426,12 +1572,8 @@ function updateAudioFeedback(){
 
 function triggerMonsterFlash(){
   state.monsterFlash = !!state.lastHeard;
-  if (state.monsterFlashTimer) clearTimeout(state.monsterFlashTimer);
-  state.monsterFlashTimer = setTimeout(function(){
-    state.monsterFlash = false;
-    renderTactilePreview();
-    pushTactile();
-  }, 700);
+  renderTactilePreview();
+  pushTactile();
 }
 
 function bestKey(){ return state.roundsTotal === 0 ? "practice" : String(state.roundsTotal); }
@@ -1446,8 +1588,16 @@ function setBest(key, val){
    7. DOM 렌더 / 화면 전환
    ============================================================ */
 var hudRoundEl, hudRoundTotalEl, hudBestEl, tensionFillEl, hudDistanceEl, hudScentEl, hudDecoysEl, decoyCountEl;
-var overlayPause, overlayResults, resultTitleEl, resultSubEl, resultRoundsEl, resultBestEl;
+var overlayPause, overlayResults, overlayTutorial, resultTitleEl, resultSubEl, resultRoundsEl, resultBestEl;
 var tileEls = [];
+var tutorialIndex = 0;
+var tutorialSteps = [
+  { kind:"player", title:"내 위치", text:"중앙의 작은 채움 블록입니다. 손끝으로 작은 사각형을 확인하세요.", className:"is-player" },
+  { kind:"sound", title:"마지막 발소리", text:"X자 점형입니다. 몬스터의 현재 위치가 아니라 마지막으로 들은 위치이며 다음 듣기까지 유지됩니다.", className:"is-last-heard" },
+  { kind:"bush", title:"덤불", text:"속이 빈 단일 테두리입니다. 냄새 추적을 막지만 정확한 발소리 칸은 들리지 않습니다.", className:"is-bush" },
+  { kind:"exit", title:"탈출구", text:"안과 밖에 선이 있는 이중 테두리입니다. 탈출 단계에서 이 점형으로 이동하세요.", className:"is-exit" },
+  { kind:"decoy", title:"소리 미끼", text:"서로 떨어진 네 점입니다. 한 판에 두 번 몬스터를 다른 곳으로 유인할 수 있습니다.", className:"is-decoy" }
+];
 
 var lastFocusedBeforeDialog = null;
 
@@ -1471,7 +1621,9 @@ function getFocusableIn(el){
 
 function trapDialogFocus(e){
   if (e.key !== "Tab") return;
-  var open = (overlayPause && !overlayPause.hidden) ? overlayPause : ((overlayResults && !overlayResults.hidden) ? overlayResults : null);
+  var open = (overlayPause && !overlayPause.hidden) ? overlayPause
+    : ((overlayResults && !overlayResults.hidden) ? overlayResults
+    : ((overlayTutorial && !overlayTutorial.hidden) ? overlayTutorial : null));
   if (!open) return;
   var focusables = getFocusableIn(open);
   if (!focusables.length) return;
@@ -1508,10 +1660,11 @@ function renderTactilePreview(){
   }
   state.bushes.forEach(function(b){ tileEls[b.row][b.col].classList.add("is-bush"); });
   if (state.exitActive && state.exit){ tileEls[state.exit.row][state.exit.col].classList.add("is-exit"); }
+  if (state.lastDecoy && state.alertTimer > 0){ tileEls[state.lastDecoy.row][state.lastDecoy.col].classList.add("is-decoy"); }
   var onBush = !!bushAt(state.player);
   tileEls[state.player.row][state.player.col].classList.add(onBush ? "is-player-bush" : "is-player");
-  if (state.monsterFlash){
-    tileEls[state.monster.row][state.monster.col].classList.add("is-monster-flash");
+  if (state.lastHeard){
+    tileEls[state.lastHeard.row][state.lastHeard.col].classList.add("is-last-heard");
   }
 }
 
@@ -1528,6 +1681,7 @@ function render(){
   decoyCountEl.textContent = state.decoys;
   document.getElementById("btn-decoy").disabled = state.decoys <= 0 || state.exitActive;
   document.querySelector(".tension-track").setAttribute("aria-label", "위험도, 몬스터 추정 거리 " + distanceLabel(distance));
+  document.getElementById("tactile-preview").setAttribute("aria-label", describeTactileMap());
   try{ renderTactilePreview(); }catch(e){}
   try{ pushTactile(); }catch(e){}
   try{ drawPin(); }catch(e){}
@@ -1554,7 +1708,7 @@ function showResults(caught, survived, best, cause){
    8. 턴 해석 / 게임 시작·종료 / 일시정지
    ============================================================ */
 function speakRules(){
-  speak("한 번 행동하면 몬스터도 한 칸 움직여요. 이동하면 떠난 칸에 소리가 남아 몬스터가 두 턴 동안 그 칸을 추적해요. 집중해서 들으면 빨간 칸으로 마지막 발소리 위치를 알 수 있지만, 같은 자리에서 세 번 들으면 냄새로 현재 위치를 추적당해요. 덤불은 냄새 추적을 막지만 정확한 발소리 칸을 들을 수 없어요. 소리 미끼는 두 번 사용할 수 있어요. 선택한 라운드까지 살아남으면 탈출구가 열리고, 세 턴 안에 도착해야 해요. 몬스터와 같은 칸에서 만나면 잡혀요.");
+  speak("한 번 행동하면 몬스터도 한 칸 움직여요. 이동하면 떠난 칸에 소리가 남아 몬스터가 두 턴 동안 그 칸을 추적해요. 집중해서 들으면 X자 점형과 방향, 칸 수로 마지막 발소리 위치를 알 수 있지만, 같은 자리에서 세 번 들으면 냄새로 현재 위치를 추적당해요. 덤불은 단일 테두리 점형이며 냄새 추적을 막지만 정확한 발소리 칸을 들을 수 없어요. 소리 미끼는 네 점 점형이고 두 번 사용할 수 있어요. 선택한 라운드까지 살아남으면 이중 테두리 탈출구가 열리고, 세 턴 안에 도착해야 해요. 몬스터와 같은 칸에서 만나면 잡혀요.");
 }
 
 function currentFear(){
@@ -1632,6 +1786,7 @@ function startGame(roundsTotal){
   state.scent = 0;
   state.decoys = 2;
   state.lastHeard = null;
+  state.lastDecoy = null;
   state.exit = null;
   state.exitActive = false;
   state.escapeTurns = 0;
@@ -1645,8 +1800,31 @@ function startGame(roundsTotal){
 
   AudioEngine.resume();
   AudioEngine.setHeartbeat(currentFear(), !!bushAt(state.player));
-  speak("게임을 시작해요. 한 번 행동하면 몬스터도 한 칸 움직여요. 빨간 칸은 마지막으로 들은 위치예요.");
+  speak("게임을 시작해요. 한 번 행동하면 몬스터도 한 칸 움직여요. 내 위치는 중앙의 작은 채움 블록이고, 마지막 발소리는 다음 듣기까지 유지되는 X자 점형이에요.");
   render();
+}
+
+function renderTutorial(){
+  var step = tutorialSteps[tutorialIndex];
+  document.getElementById("tutorial-step").textContent = (tutorialIndex + 1) + " / " + tutorialSteps.length;
+  document.getElementById("tutorial-title").textContent = step.title;
+  document.getElementById("tutorial-sub").textContent = step.text;
+  document.getElementById("tutorial-pattern").className = "tile " + step.className;
+  document.getElementById("btn-tutorial-prev").disabled = tutorialIndex === 0;
+  document.getElementById("btn-tutorial-next").textContent = tutorialIndex === tutorialSteps.length - 1 ? "처음부터" : "다음";
+  DotPad.render(encodePins(buildTutorialBitmap(step.kind)));
+  speak(step.title + ". " + step.text);
+}
+
+function openTutorial(){
+  tutorialIndex = 0;
+  openDialog(overlayTutorial);
+  renderTutorial();
+}
+
+function closeTutorial(){
+  closeDialog(overlayTutorial, document.getElementById("btn-tutorial"));
+  try{ DotPad.render(encodePins(buildBitmap(state))); }catch(e){}
 }
 
 function chooseExit(){
@@ -1674,6 +1852,7 @@ function deployDecoy(){
   }
   state.decoys--;
   state.lastNoise = pickRandom(candidates);
+  state.lastDecoy = { row:state.lastNoise.row, col:state.lastNoise.col };
   state.alertTimer = 2;
   state.scent = 0;
   state.stayStreak = 0;
@@ -1844,6 +2023,7 @@ function init(){
   decoyCountEl = document.getElementById("decoy-count");
   overlayPause = document.getElementById("overlay-pause");
   overlayResults = document.getElementById("overlay-results");
+  overlayTutorial = document.getElementById("overlay-tutorial");
   resultTitleEl = document.getElementById("result-title");
   resultSubEl = document.getElementById("result-sub");
   resultRoundsEl = document.getElementById("result-rounds");
@@ -1892,6 +2072,18 @@ function init(){
     AudioEngine.resume();
     speakRules();
   });
+  document.getElementById("btn-tutorial").addEventListener("click", function(){
+    AudioEngine.resume();
+    openTutorial();
+  });
+  document.getElementById("btn-tutorial-prev").addEventListener("click", function(){
+    if (tutorialIndex > 0){ tutorialIndex--; renderTutorial(); }
+  });
+  document.getElementById("btn-tutorial-next").addEventListener("click", function(){
+    tutorialIndex = tutorialIndex === tutorialSteps.length - 1 ? 0 : tutorialIndex + 1;
+    renderTutorial();
+  });
+  document.getElementById("btn-tutorial-close").addEventListener("click", closeTutorial);
   document.getElementById("btn-repeat").addEventListener("click", function(){ Game.dispatch("repeat"); });
   document.getElementById("btn-decoy").addEventListener("click", function(){ Game.dispatch("decoy"); });
   document.getElementById("btn-pause").addEventListener("click", function(){ Game.dispatch("pause"); });
@@ -1946,6 +2138,9 @@ function init(){
   document.addEventListener("keydown", trapDialogFocus);
 
   document.addEventListener("keydown", function(e){
+    if (state.screen !== "game") return;
+    var target = e.target;
+    if (target && /INPUT|TEXTAREA|SELECT/.test(target.tagName)) return;
     var map = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
     if (map[e.key]){ e.preventDefault(); Game.dispatch("move", map[e.key]); return; }
     var k = e.key.toLowerCase();
