@@ -1528,7 +1528,7 @@ function updateNarrative(action){
   } else if (action === "move" && onBush){
     line = "덤불 속으로 이동했어요. 이곳에서는 냄새 추적을 피하지만 정확한 발소리 칸은 알 수 없어요.";
   } else if (action === "move"){
-    line = "떠난 칸에 발소리가 남았어요. 몬스터가 2턴 동안 그 칸을 추적해요." + (state.lastHeard ? " 마지막 발소리 X자는 현재 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "예요." : "");
+    line = "떠난 칸에 발소리가 남았어요. 몬스터가 2턴 동안 그 칸을 추적해요." + (state.lastHeard ? " 마지막 발소리 X자는 현재 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "에 있어요." : "");
   } else if (onBush){
     line = "덤불 때문에 정확한 칸은 알 수 없어요. " + directionOnly(state.player, state.monster) + "에서 " + distanceLabel(newDist) + " 발소리가 들려요.";
   } else if (state.scent >= 3){
