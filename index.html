@@ -410,6 +410,21 @@ button{ font-family:inherit; }
   border-color: var(--dg-danger);
   box-shadow: 0 0 16px rgba(226,71,43,.85);
 }
+.tactile-legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:8px;
+  font-size:11.5px;
+  color: var(--dg-text-faint);
+}
+.tactile-legend span{ display:flex; align-items:center; gap:6px; }
+.tactile-legend .tile{
+  width:14px; height:14px;
+  display:inline-block;
+  flex:none;
+  border-radius:4px;
+}
 
 .caption-box{
   min-height: 56px;
@@ -607,6 +622,11 @@ button{ font-family:inherit; }
     <div class="game-layout">
       <div>
         <div class="tactile-preview" id="tactile-preview" role="img" aria-label="촉각 미리보기: 내 위치와 방금 느껴진 발소리 위치"></div>
+        <div class="tactile-legend" aria-hidden="true">
+          <span><i class="tile is-player"></i>나</span>
+          <span><i class="tile is-bush"></i>덤불</span>
+          <span><i class="tile is-monster-flash"></i>발소리</span>
+        </div>
         <div class="dpad">
           <button class="dpad-up" data-dir="up" type="button" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
           <button class="dpad-left" data-dir="left" type="button" aria-label="왼쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 5 5 12 12 19"/></svg></button>
@@ -1506,9 +1526,17 @@ function render(){
   try{ drawPin(); }catch(e){}
 }
 
-function showResults(caught, survived, best){
+function showResults(caught, survived, best, cause){
   resultTitleEl.textContent = caught ? "들켰어요…" : (state.roundsTotal > 0 ? "새벽이 밝았어요" : "정말 오래 버텼어요");
-  resultSubEl.textContent = caught ? "그래도 " + survived + "라운드나 숨죽였어요." : "끝까지 들키지 않았어요.";
+  var causeText = {
+    noise: "발소리를 낸 순간 바로 들켰어요.",
+    chase: "발소리를 쫓아온 몬스터에게 들켰어요.",
+    camp: "너무 오래 한자리에 있어서 들켰어요.",
+    luck: "몬스터가 우연히 다가와 들켰어요."
+  }[cause];
+  resultSubEl.textContent = caught
+    ? (causeText || "그래도 " + survived + "라운드나 숨죽였어요.")
+    : "끝까지 들키지 않았어요.";
   resultRoundsEl.textContent = survived;
   resultBestEl.textContent = best;
   openDialog(overlayResults);
@@ -1541,7 +1569,7 @@ function togglePause(){
   }
 }
 
-function endGame(caught){
+function endGame(caught, cause){
   state.gameOver = true;
   AudioEngine.setBreathing(false);
   AudioEngine.stopHeartbeat();
@@ -1553,10 +1581,17 @@ function endGame(caught){
   var best = isNewBest ? survived : prevBest;
   if (isNewBest) setBest(key, survived);
 
+  var causeSpoken = {
+    noise: "발소리를 낸 순간 바로 들켰어요.",
+    chase: "발소리를 쫓아온 몬스터에게 들켰어요.",
+    camp: "너무 오래 한자리에 있어서 들켰어요.",
+    luck: "몬스터가 우연히 다가와 들켰어요."
+  }[cause];
+
   var line;
   if (caught){
     AudioEngine.sting("caught");
-    line = "들켰어요… " + survived + "라운드 버텼어요.";
+    line = "들켰어요… " + (causeSpoken || "") + " " + survived + "라운드 버텼어요.";
   } else {
     AudioEngine.sting("dawn");
     line = (state.roundsTotal > 0 ? "새벽이 밝았어요. 살았어요! " : "정말 오래 버텼어요! ") + survived + "라운드를 버텼어요.";
@@ -1566,7 +1601,7 @@ function endGame(caught){
 
   DotPad.pulse(caught ? 2 : 3);
   render();
-  showResults(caught, survived, best);
+  showResults(caught, survived, best, cause);
   postToHost("gameover", { caught: caught, rounds: survived });
 }
 
@@ -1622,6 +1657,7 @@ Game.dispatch = function(action, dir){
   // "계속 무작위로 움직이면 오히려 못 따라잡는" 역설이 생기므로, 소리 난 순간 자체의
   // 즉각적인 위험을 별도로 반영한다.
   var instantCaught = false;
+  var wasChasing = state.alertTimer > 0;
   if (noiseThisTurn){
     var practice = state.roundsTotal === 0;
     var dNow = dist(state.player, state.monster);
@@ -1637,7 +1673,12 @@ Game.dispatch = function(action, dir){
 
   if (sameTile(state.player, state.monster)){
     try{ triggerMonsterFlash(); }catch(e){}
-    endGame(true);
+    var catchCause;
+    if (instantCaught) catchCause = "noise";
+    else if (wasChasing) catchCause = "chase";
+    else if (state.stayStreak >= 5) catchCause = "camp";
+    else catchCause = "luck";
+    endGame(true, catchCause);
     return;
   }
 
