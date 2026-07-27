@@ -621,7 +621,7 @@ button{ font-family:inherit; }
         <svg viewBox="0 0 24 62"><g class="footprint"><path d="M22.8,19 C22.9,25 22.6,29 22.1,32 C21.3,37 20.1,38.5 19.6,41 C19,45 18.2,46.5 18,49.5 C17.7,54.5 13.8,61 10,62 C6.2,61 3.7,54.5 3.4,49.5 C3.2,46.5 6.9,45 7.6,41 C8.5,37.5 3.3,32.5 2.6,28 C2.1,24.5 1.1,21 0.8,19 C6,15.3 17.5,15.3 22.8,19 Z"/><ellipse cx="4.3" cy="4.6" rx="3.1" ry="4.3" transform="rotate(-8 4.3 4.6)"/><ellipse cx="10.8" cy="3.0" rx="2.3" ry="3.2" transform="rotate(-2 10.8 3.0)"/><ellipse cx="16.3" cy="3.7" rx="1.75" ry="2.5" transform="rotate(12 16.3 3.7)"/><ellipse cx="20.6" cy="5.9" rx="1.35" ry="1.9" transform="rotate(24 20.6 5.9)"/><ellipse cx="23.4" cy="9.2" rx="1.0" ry="1.45" transform="rotate(34 23.4 9.2)"/></g></svg>
         <svg viewBox="0 0 24 62"><g class="footprint"><path d="M22.8,19 C22.9,25 22.6,29 22.1,32 C21.3,37 20.1,38.5 19.6,41 C19,45 18.2,46.5 18,49.5 C17.7,54.5 13.8,61 10,62 C6.2,61 3.7,54.5 3.4,49.5 C3.2,46.5 6.9,45 7.6,41 C8.5,37.5 3.3,32.5 2.6,28 C2.1,24.5 1.1,21 0.8,19 C6,15.3 17.5,15.3 22.8,19 Z"/><ellipse cx="4.3" cy="4.6" rx="3.1" ry="4.3" transform="rotate(-8 4.3 4.6)"/><ellipse cx="10.8" cy="3.0" rx="2.3" ry="3.2" transform="rotate(-2 10.8 3.0)"/><ellipse cx="16.3" cy="3.7" rx="1.75" ry="2.5" transform="rotate(12 16.3 3.7)"/><ellipse cx="20.6" cy="5.9" rx="1.35" ry="1.9" transform="rotate(24 20.6 5.9)"/><ellipse cx="23.4" cy="9.2" rx="1.0" ry="1.45" transform="rotate(34 23.4 9.2)"/></g></svg>
       </div>
-      <p class="title-sub">발소리의 마지막 위치를 기억하고, 소리를 흘려 몬스터를 따돌린 뒤 탈출하세요.</p>
+      <p class="title-sub" id="title-mode-subtitle">발소리의 마지막 위치를 기억하고, 소리를 흘려 몬스터를 따돌린 뒤 탈출하세요.</p>
     </div>
 
     <div class="panel">
@@ -639,17 +639,17 @@ button{ font-family:inherit; }
     <div class="panel">
       <p class="section-label">먼저 알아둘 규칙</p>
       <ol class="rules-list">
-        <li><b>탈출</b> — 정해진 라운드를 버티면 탈출구가 열려요. 그때부터 3턴 안에 <b>이중 테두리</b> 탈출구로 이동하세요.</li>
+        <li id="rule-escape"><b>탈출</b> — 정해진 라운드를 버티면 탈출구가 열려요. 그때부터 3턴 안에 <b>이중 테두리</b> 탈출구로 이동하세요.</li>
         <li><b>한 턴</b> — 내가 한 번 행동하면 몬스터도 한 칸 움직여요.</li>
         <li><b>이동</b> — 한 칸 걷습니다. 방금 떠난 칸에 <b>발소리 흔적</b>이 남고, 몬스터는 2턴 동안 그곳을 확인해요. 몬스터와 같은 칸에 들어가면 게임 오버예요.</li>
         <li><b>집중해서 듣기</b> — 움직이지 않고 마지막 발소리를 <b>X자 점형</b>으로 확인해요. X자는 다음에 다시 듣기 전까지 남아 있어요.</li>
       </ol>
-      <details class="rules-more">
-        <summary>고급 규칙 보기 — 반복 듣기 · 덤불 · 미끼</summary>
+      <details class="rules-more" id="rules-more">
+        <summary id="rules-more-summary">고급 규칙 보기 — 반복 듣기 · 덤불 · 미끼</summary>
         <ol class="rules-list" start="5">
-        <li><b>반복해서 듣기</b> — 같은 자리에서 3번 들으면 잔향이 3단계가 되고, 몬스터가 내 위치를 포착해요.</li>
-        <li><b>덤불</b> — 발소리 잔향을 흡수해 진동 포착을 피할 수 있어요. 대신 정확한 칸 대신 <b>방향과 거리</b>만 들려요.</li>
-        <li><b>소리 미끼</b> — 한 판에 2번 사용할 수 있어요. <b>네 점 점형</b>이 나타난 곳으로 몬스터를 2턴 동안 유인합니다.</li>
+        <li id="rule-resonance"><b>반복해서 듣기</b> — 같은 자리에서 3번 들으면 잔향이 3단계가 되고, 몬스터가 내 위치를 포착해요.</li>
+        <li id="rule-bush"><b>덤불</b> — 발소리 잔향을 흡수해 진동 포착을 피할 수 있어요. 대신 정확한 칸 대신 <b>방향과 거리</b>만 들려요.</li>
+        <li id="rule-decoy"><b>소리 미끼</b> — 한 판에 2번 사용할 수 있어요. <b>네 점 점형</b>이 나타난 곳으로 몬스터를 2턴 동안 유인합니다.</li>
         </ol>
       </details>
     </div>
@@ -663,7 +663,7 @@ button{ font-family:inherit; }
       <div class="controls-legend" data-controls-panel="keyboard">
         <div class="key-chip"><b>↑↓←→</b><span>이동<em>(소리가 나요)</em></span></div>
         <div class="key-chip"><b>S</b><span>집중해서 듣기</span></div>
-        <div class="key-chip"><b>D</b><span>소리 미끼<em>(2회)</em></span></div>
+        <div class="key-chip" id="control-decoy-keyboard"><b>D</b><span>소리 미끼<em>(2회)</em></span></div>
         <div class="key-chip"><b>R</b><span>안내 다시 듣기</span></div>
         <div class="key-chip"><b>P</b><span>일시정지</span></div>
         <div class="key-chip"><b>H</b><span>도움말</span></div>
@@ -671,7 +671,7 @@ button{ font-family:inherit; }
       <div class="controls-legend" data-controls-panel="dotpad" hidden>
         <div class="key-chip"><b>F1~F4</b><span>상/하/좌/우 이동</span></div>
         <div class="key-chip"><b>Pan 전체</b><span>집중해서 듣기</span></div>
-        <div class="key-chip"><b>LPF2</b><span>소리 미끼<em>(2회)</em></span></div>
+        <div class="key-chip" id="control-decoy-dotpad"><b>LPF2</b><span>소리 미끼<em>(2회)</em></span></div>
         <div class="key-chip"><b>Pan 좌</b><span>안내 다시 듣기</span></div>
         <div class="key-chip"><b>Pan 우</b><span>도움말</span></div>
         <div class="key-chip"><b>LPF1</b><span>일시정지</span></div>
@@ -1437,6 +1437,31 @@ function updateModeGuide(){
   if (f.label === "연습") el.textContent = "연습: 이동, 집중해서 듣기, X자 점형만 익혀요. 시간 제한은 없어요.";
   else if (f.label === "기본") el.textContent = "기본 5라운드: 덤불과 잔향까지 익혀요. 미끼와 탈출은 아직 나오지 않아요.";
   else el.textContent = selectedRounds + "라운드: 덤불·소리 미끼·탈출까지 모두 사용해요.";
+  updateModeDetails(f);
+}
+
+function updateModeDetails(f){
+  var titleSub = document.getElementById("title-mode-subtitle");
+  var rulesMore = document.getElementById("rules-more");
+  var rulesMoreSummary = document.getElementById("rules-more-summary");
+  document.getElementById("rule-escape").hidden = !f.exit;
+  document.getElementById("rule-resonance").hidden = !f.resonance;
+  document.getElementById("rule-bush").hidden = !f.bushes;
+  document.getElementById("rule-decoy").hidden = !f.decoy;
+  document.getElementById("control-decoy-keyboard").hidden = !f.decoy;
+  document.getElementById("control-decoy-dotpad").hidden = !f.decoy;
+  rulesMore.hidden = !f.resonance && !f.bushes && !f.decoy;
+  rulesMore.open = false;
+  rulesMore.querySelector("ol").start = f.exit ? 5 : 4;
+  if (f.label === "연습"){
+    titleSub.textContent = "몬스터와 거리를 두고, X자 점형으로 마지막 발소리를 확인하세요.";
+  } else if (f.label === "기본"){
+    titleSub.textContent = "발소리를 기억하고, 덤불을 이용해 몬스터를 따돌리세요.";
+    rulesMoreSummary.textContent = "고급 규칙 보기 — 반복 듣기 · 덤불";
+  } else {
+    titleSub.textContent = "발소리의 마지막 위치를 기억하고, 소리를 흘려 몬스터를 따돌린 뒤 탈출하세요.";
+    rulesMoreSummary.textContent = "고급 규칙 보기 — 반복 듣기 · 덤불 · 미끼";
+  }
 }
 
 function generateBushes(exclude, count){
