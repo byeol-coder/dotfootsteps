@@ -365,6 +365,21 @@ button{ font-family:inherit; }
   transition: width var(--dg-motion-med) ease;
   border-radius: inherit;
 }
+.turn-status{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:8px;
+}
+.turn-status span{
+  background:var(--dg-panel-2);
+  border:1px solid var(--dg-border-soft);
+  border-radius:var(--dg-radius-md);
+  padding:9px 10px;
+  color:var(--dg-text-muted);
+  font-size:12px;
+  text-align:center;
+}
+.turn-status b{ color:var(--dg-text); font-weight:600; }
 
 .tactile-preview{
   --cols: 6;
@@ -409,6 +424,11 @@ button{ font-family:inherit; }
   background: var(--dg-danger);
   border-color: var(--dg-danger);
   box-shadow: 0 0 16px rgba(226,71,43,.85);
+}
+.tile.is-exit{
+  background:transparent;
+  border:2px solid var(--dg-safe-strong);
+  box-shadow:inset 0 0 0 3px var(--dg-bg-alt), 0 0 12px rgba(183,217,206,.45);
 }
 .tactile-legend{
   display:flex;
@@ -543,7 +563,7 @@ button{ font-family:inherit; }
         <svg viewBox="0 0 24 62"><g class="footprint"><path d="M22.8,19 C22.9,25 22.6,29 22.1,32 C21.3,37 20.1,38.5 19.6,41 C19,45 18.2,46.5 18,49.5 C17.7,54.5 13.8,61 10,62 C6.2,61 3.7,54.5 3.4,49.5 C3.2,46.5 6.9,45 7.6,41 C8.5,37.5 3.3,32.5 2.6,28 C2.1,24.5 1.1,21 0.8,19 C6,15.3 17.5,15.3 22.8,19 Z"/><ellipse cx="4.3" cy="4.6" rx="3.1" ry="4.3" transform="rotate(-8 4.3 4.6)"/><ellipse cx="10.8" cy="3.0" rx="2.3" ry="3.2" transform="rotate(-2 10.8 3.0)"/><ellipse cx="16.3" cy="3.7" rx="1.75" ry="2.5" transform="rotate(12 16.3 3.7)"/><ellipse cx="20.6" cy="5.9" rx="1.35" ry="1.9" transform="rotate(24 20.6 5.9)"/><ellipse cx="23.4" cy="9.2" rx="1.0" ry="1.45" transform="rotate(34 23.4 9.2)"/></g></svg>
         <svg viewBox="0 0 24 62"><g class="footprint"><path d="M22.8,19 C22.9,25 22.6,29 22.1,32 C21.3,37 20.1,38.5 19.6,41 C19,45 18.2,46.5 18,49.5 C17.7,54.5 13.8,61 10,62 C6.2,61 3.7,54.5 3.4,49.5 C3.2,46.5 6.9,45 7.6,41 C8.5,37.5 3.3,32.5 2.6,28 C2.1,24.5 1.1,21 0.8,19 C6,15.3 17.5,15.3 22.8,19 Z"/><ellipse cx="4.3" cy="4.6" rx="3.1" ry="4.3" transform="rotate(-8 4.3 4.6)"/><ellipse cx="10.8" cy="3.0" rx="2.3" ry="3.2" transform="rotate(-2 10.8 3.0)"/><ellipse cx="16.3" cy="3.7" rx="1.75" ry="2.5" transform="rotate(12 16.3 3.7)"/><ellipse cx="20.6" cy="5.9" rx="1.35" ry="1.9" transform="rotate(24 20.6 5.9)"/><ellipse cx="23.4" cy="9.2" rx="1.0" ry="1.45" transform="rotate(34 23.4 9.2)"/></g></svg>
       </div>
-      <p class="title-sub">숨을 죽이고, 손끝으로 다가오는 발소리를 쫓으세요. 움직이면 들키고, 가만히 있으면 지쳐가요.</p>
+      <p class="title-sub">발소리의 마지막 위치를 기억하고, 소리를 흘려 몬스터를 따돌린 뒤 탈출하세요.</p>
     </div>
 
     <div class="panel">
@@ -559,13 +579,13 @@ button{ font-family:inherit; }
     <div class="panel">
       <p class="section-label">게임 규칙</p>
       <ol class="rules-list">
-        <li><b>목표</b> — 정해진 라운드(연습 모드는 무제한)까지 몬스터에게 들키지 않고 버티기.</li>
-        <li><b>몬스터의 움직임</b> — 평소엔 정처 없이 돌아다니지만, 가끔 내 위치를 정확히 향해 다가와요. 그 확률은 라운드가 지날수록 조금씩 올라가요.</li>
-        <li><b>움직이면 위험해요</b> — 방향키로 움직이면 소리가 나요. 몬스터가 가까이 있을 때 움직이면 그 자리에서 바로 들킬 수 있고, 멀리 있을 때 움직이면 몇 턴 동안 그 위치로 쫓아와요.</li>
-        <li><b>가만히 있으면 상대적으로 안전</b> — 다만 한자리에 너무 오래(4턴 이상) 웅크리면 위험이 서서히 쌓여요. 계속 한곳에만 있진 마세요.</li>
-        <li><b>덤불</b> — 숨으면 몬스터에게 덜 들키지만, 나도 발소리를 잘 못 들어요. "지금이 기회예요!" 안내가 나오면 안전하게 이동할 타이밍이에요.</li>
-        <li><b>위험 신호</b> — "조용해요" → "너무 조용해요… 뭔가 다가오는 느낌" → "심장이 쿵쿵거려요" 순으로 안내와 심장박동 소리가 점점 급해져요.</li>
-        <li><b>약간의 운</b> — 아주 가끔은 잘 숨었어도 몬스터가 우연히 다가와 마주칠 수 있어요. 완전히 안전한 방법은 없어요.</li>
+        <li><b>목표</b> — 선택한 라운드까지 살아남으면 탈출구가 열려요. 이후 3턴 안에 탈출구에 도착하세요.</li>
+        <li><b>한 행동은 한 라운드</b> — 내가 이동하거나 듣기를 하면 몬스터도 반드시 한 칸 움직여요.</li>
+        <li><b>이동</b> — 떠난 칸에 소리가 남고, 몬스터는 그 칸을 2턴 동안 추적해요. 확률로 즉사하지 않으며 같은 칸에서 만나면 잡혀요.</li>
+        <li><b>집중해서 듣기</b> — 빨간 칸으로 마지막 발소리 위치를 확인해요. 같은 자리에서 3번 연속 들으면 냄새가 짙어져 현재 위치를 추적당해요.</li>
+        <li><b>덤불</b> — 냄새 추적을 막아 주지만, 덤불 안에서는 발소리의 정확한 칸을 알 수 없어요.</li>
+        <li><b>소리 미끼</b> — 한 판에 2번, 먼 칸에 소리를 내어 몬스터를 2턴 동안 유인할 수 있어요.</li>
+        <li><b>빨간 칸</b> — 몬스터의 현재 위치가 아니라 마지막으로 들은 위치예요. 몬스터는 그 뒤에 이동했을 수 있어요.</li>
       </ol>
     </div>
 
@@ -577,14 +597,16 @@ button{ font-family:inherit; }
       </div>
       <div class="controls-legend" data-controls-panel="keyboard">
         <div class="key-chip"><b>↑↓←→</b><span>이동<em>(소리가 나요)</em></span></div>
-        <div class="key-chip"><b>S</b><span>가만히 있기</span></div>
+        <div class="key-chip"><b>S</b><span>집중해서 듣기</span></div>
+        <div class="key-chip"><b>D</b><span>소리 미끼<em>(2회)</em></span></div>
         <div class="key-chip"><b>R</b><span>안내 다시 듣기</span></div>
         <div class="key-chip"><b>P</b><span>일시정지</span></div>
         <div class="key-chip"><b>H</b><span>도움말</span></div>
       </div>
       <div class="controls-legend" data-controls-panel="dotpad" hidden>
         <div class="key-chip"><b>F1~F4</b><span>상/하/좌/우 이동</span></div>
-        <div class="key-chip"><b>Pan 전체</b><span>가만히 있기</span></div>
+        <div class="key-chip"><b>Pan 전체</b><span>집중해서 듣기</span></div>
+        <div class="key-chip"><b>LPF2</b><span>소리 미끼<em>(2회)</em></span></div>
         <div class="key-chip"><b>Pan 좌</b><span>안내 다시 듣기</span></div>
         <div class="key-chip"><b>Pan 우</b><span>도움말</span></div>
         <div class="key-chip"><b>LPF1</b><span>일시정지</span></div>
@@ -619,6 +641,11 @@ button{ font-family:inherit; }
       </div>
       <div class="hud-stat">최고 <b id="hud-best">0</b></div>
     </div>
+    <div class="turn-status" aria-label="현재 상태">
+      <span>거리 <b id="hud-distance">멀리</b></span>
+      <span>냄새 <b id="hud-scent">0/3</b></span>
+      <span>미끼 <b id="hud-decoys">2</b></span>
+    </div>
 
     <div class="game-layout">
       <div>
@@ -626,12 +653,13 @@ button{ font-family:inherit; }
         <div class="tactile-legend" aria-hidden="true">
           <span><i class="tile is-player"></i>나</span>
           <span><i class="tile is-bush"></i>덤불</span>
-          <span><i class="tile is-monster-flash"></i>발소리</span>
+          <span><i class="tile is-monster-flash"></i>마지막 발소리</span>
+          <span><i class="tile is-exit"></i>탈출구</span>
         </div>
         <div class="dpad">
           <button class="dpad-up" data-dir="up" type="button" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
           <button class="dpad-left" data-dir="left" type="button" aria-label="왼쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 5 5 12 12 19"/></svg></button>
-          <button class="dpad-stay" data-action="stay" type="button" aria-label="가만히 있기"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/></svg></button>
+          <button class="dpad-stay" data-action="listen" type="button" aria-label="집중해서 듣기"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/></svg></button>
           <button class="dpad-right" data-dir="right" type="button" aria-label="오른쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
           <button class="dpad-down" data-dir="down" type="button" aria-label="아래로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></button>
         </div>
@@ -643,6 +671,10 @@ button{ font-family:inherit; }
           <span id="caption-text">시작하면 여기에 상황이 안내돼요.</span>
         </div>
         <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-decoy" type="button">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h2m3-4v8m4-11v14m4-10v6"/></svg>
+            소리 미끼 <span id="decoy-count">2</span>
+          </button>
           <button class="btn btn-ghost" id="btn-repeat" type="button">
             <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
             다시 듣기
@@ -785,8 +817,9 @@ function buildBitmap(state){
   }
 
   state.bushes.forEach(ringTile);   // 덤불: 속이 빈 테두리 — 터치로 지형지물 구분
+  if (state.exitActive && state.exit){ ringTile(state.exit); }
   fillTile(state.player);           // 나: 항상 꽉 찬 블록 (기준점)
-  if (state.monsterFlash){ fillTile(state.monster); } // 발소리 순간: 잠깐 꽉 찬 블록
+  if (state.monsterFlash && state.lastHeard){ fillTile(state.lastHeard); } // 마지막으로 들은 위치
 
   return bmp;
 }
@@ -812,6 +845,7 @@ var DotPad = (function(){
       case KeyCodes.PanningLeft:  Game.dispatch("repeat"); break;
       case KeyCodes.PanningRight: Game.dispatch("help"); break;
       case KeyCodes.LPF1:         Game.dispatch("pause"); break;
+      case KeyCodes.LPF2:         Game.dispatch("decoy"); break;
     }
   }
 
@@ -1252,7 +1286,14 @@ var state = {
   monsterFlashTimer: null,
   paused: false,
   gameOver: false,
-  stayStreak: 0
+  stayStreak: 0,
+  scent: 0,
+  decoys: 2,
+  lastHeard: null,
+  exit: null,
+  exitActive: false,
+  escapeTurns: 0,
+  history: []
 };
 var selectedRounds = 10;
 
@@ -1293,25 +1334,13 @@ function stepMonster(){
   });
   if (cand.length === 0) cand = neighbors(state.monster);
 
-  var practice = state.roundsTotal === 0;
-  // "발소리" 게임답게 진짜 위험은 움직임(소리)에서 오도록: 이동 직후 추적 확률을 매우 높게.
-  var greedyChance = practice ? 0.72 : 0.95;
-  // 가만히 있을 때의 기본 위험도는 낮고 완만하게 — 오래 버틸수록 조금씩만 위험해짐.
-  var senseBase = practice ? 0.02 : 0.04;
-  var senseSlope = practice ? 0.008 : 0.018;
-  var senseCap = practice ? 0.2 : 0.34;
-  // 웅크림 페널티도 훨씬 관대하게(4턴까진 무료) — "가만히 있으면 안전"이 기본값이 되도록.
-  var campBonus = Math.min(0.4, Math.max(0, state.stayStreak - 4) * (practice ? 0.035 : 0.055));
-  // 덤불: 소리도 죽이고 발각 확률 자체도 낮춤(가만히 있을 때든 추적당할 때든 둘 다 유리).
-  var bushGuard = bushAt(state.player) ? 0.55 : 1;
-
   var choice;
   if (state.alertTimer > 0 && state.lastNoise){
-    var chaseChance = Math.min(0.97, greedyChance * (bushAt(state.player) ? 0.75 : 1));
-    choice = (Math.random() < chaseChance) ? greedyTowards(cand, state.lastNoise) : pickRandom(cand);
+    choice = greedyTowards(cand, state.lastNoise);
+  } else if (state.scent >= 3 && !bushAt(state.player)){
+    choice = greedyTowards(cand, state.player);
   } else {
-    var senseChance = Math.min(0.85, (Math.min(senseCap, senseBase + state.round * senseSlope) + campBonus) * bushGuard);
-    choice = (Math.random() < senseChance) ? greedyTowards(cand, state.player) : pickRandom(cand);
+    choice = pickRandom(cand);
   }
   state.monsterPrev = prev;
   state.monster = choice;
@@ -1324,75 +1353,45 @@ function tryMove(dir){
   if (!d) return { ok: false };
   var next = { row: state.player.row + d[0], col: state.player.col + d[1] };
   if (!inBounds(next)) return { ok: false };
+  var departed = { row: state.player.row, col: state.player.col };
   state.player = next;
-  state.alertTimer = 4; // 발소리 여운이 더 오래감 — 움직임이 진짜 위험하다는 걸 체감시킴
-  state.lastNoise = { row: next.row, col: next.col };
+  state.alertTimer = 2;
+  state.lastNoise = departed;
   state.stayStreak = 0;
+  state.scent = 0;
   return { ok: true };
 }
 
-function updateNarrative(noiseThisTurn){
+function distanceLabel(distance){
+  if (distance <= 1) return "바로 옆";
+  if (distance <= 3) return "가까움";
+  return "멀리";
+}
+
+function updateNarrative(action){
   var newDist = dist(state.player, state.monster);
   var onBush = !!bushAt(state.player);
   var prevD = state.prevDistance;
   var line, urgent = false;
 
-  if (noiseThisTurn && onBush){
-    line = pickRandom([
-      "덤불 속으로 숨었어요. 발소리가 조금 죽었어요.",
-      "덤불 사이에 몸을 웅크렸어요.",
-      "잎사귀 속에 몸을 숨겼어요… 소리가 흐려져요."
-    ]);
+  if (state.exitActive){
+    line = "탈출구가 열렸어요. " + state.escapeTurns + "턴 안에 빛나는 테두리 칸으로 이동하세요.";
+    urgent = state.escapeTurns <= 1;
+  } else if (action === "decoy"){
+    line = "먼 곳에 소리 미끼를 던졌어요. 몬스터가 2턴 동안 그 소리를 따라가요.";
+  } else if (action === "move" && onBush){
+    line = "덤불 속으로 이동했어요. 이곳에서는 냄새 추적을 피하지만 정확한 발소리 칸은 알 수 없어요.";
+  } else if (action === "move"){
+    line = "떠난 칸에 발소리가 남았어요. 몬스터가 2턴 동안 그 칸을 추적해요.";
+  } else if (onBush){
+    line = "덤불 때문에 발소리가 흐려요. 거리는 " + distanceLabel(newDist) + "예요.";
+  } else if (state.scent >= 3){
+    line = "냄새가 짙어졌어요! 몬스터가 지금 위치를 추적해요. 바로 이동하세요.";
+    urgent = true;
   } else {
-    var nearBush = adjacentBush(state.player);
-    var campWarnDue = !noiseThisTurn && state.stayStreak >= 4 && state.stayStreak % 2 === 0 && newDist > 1;
-    var movedIntoDanger = noiseThisTurn && newDist > 1;
-    if (nearBush && !onBush && newDist >= 4 && state.alertTimer === 0){
-      line = pickRandom([
-        "지금이 기회예요! 덤불로 뛰어들 수 있어요.",
-        "지금이라면 덤불까지 조용히 갈 수 있어요."
-      ]);
-    } else if (newDist <= 1){
-      line = (prevD > 2)
-        ? pickRandom(["심장이 철렁해요! 바로 옆이에요.", "헉— 바로 옆에 있어요!"])
-        : pickRandom(["숨소리가 들려요… 바로 옆이에요.", "여전히 바로 옆이에요… 숨을 참으세요."]);
+    line = "집중해서 들었어요. 마지막 발소리는 빨간 칸이고, 현재 추정 거리는 " + distanceLabel(newDist) + "예요. 냄새 " + state.scent + "/3.";
+    if (newDist <= 1){
       urgent = true;
-    } else if (movedIntoDanger){
-      line = pickRandom([
-        "발소리를 냈어요… 들켰을지도 몰라요.",
-        "방금 소리가 났어요. 조심하세요!",
-        "발소리가 울렸어요… 이쪽으로 올 수도 있어요."
-      ]);
-    } else if (campWarnDue){
-      if (state.stayStreak >= 8){
-        line = pickRandom([
-          "심장이 쿵쿵거려요… 더는 못 버틸 것 같아요!",
-          "너무 오래 있었어요… 곧 들킬 것 같아요!"
-        ]);
-        urgent = true;
-      } else if (state.stayStreak >= 6){
-        line = pickRandom([
-          "너무 조용해요… 뭔가 다가오는 느낌이에요.",
-          "등골이 서늘해요… 계속 여기 있어도 될까요?"
-        ]);
-      } else {
-        line = pickRandom([
-          "너무 오래 가만히 있으면 위험해요… 냄새를 맡을지도 몰라요.",
-          "슬슬 자리를 옮겨야 할 때예요."
-        ]);
-      }
-    } else if (prevD <= 1 && newDist >= 3){
-      line = pickRandom(["가만히 있어… 지나갔어요.", "휴… 눈치 못 채고 지나갔어요."]);
-    } else if (newDist - prevD <= -2){
-      line = pickRandom(["발소리가 빠르게 가까워지고 있어요.", "발소리가 성큼성큼 다가와요."]);
-    } else if (newDist - prevD >= 2){
-      line = pickRandom(["발소리가 멀어지고 있어요.", "발소리가 점점 흐려져요."]);
-    } else {
-      line = pickRandom([
-        "조용해요… 발소리가 그대로예요.",
-        "고요해요… 아직은 그대로예요.",
-        "발소리가 비슷한 거리에서 맴돌아요."
-      ]);
     }
   }
 
@@ -1416,7 +1415,7 @@ function updateAudioFeedback(){
   // 심장박동은 "물리적 거리"뿐 아니라 "웅크림으로 쌓인 위험"도 반영해야
   // 몬스터가 멀리 있어도 가만히 있을수록 실제 위험을 귀로 느낄 수 있음.
   var distFear = clamp(1 - distance / MAX_DIST, 0, 1);
-  var campFear = Math.min(1, Math.max(0, state.stayStreak - 1) * 0.2);
+  var campFear = state.scent / 3;
   AudioEngine.setHeartbeat(Math.max(distFear, campFear), muffled);
 
   if (distance <= 1 && state.prevDistance > 2){
@@ -1427,7 +1426,7 @@ function updateAudioFeedback(){
 }
 
 function triggerMonsterFlash(){
-  state.monsterFlash = true;
+  state.monsterFlash = !!state.lastHeard;
   if (state.monsterFlashTimer) clearTimeout(state.monsterFlashTimer);
   state.monsterFlashTimer = setTimeout(function(){
     state.monsterFlash = false;
@@ -1447,7 +1446,7 @@ function setBest(key, val){
 /* ============================================================
    7. DOM 렌더 / 화면 전환
    ============================================================ */
-var hudRoundEl, hudRoundTotalEl, hudBestEl, tensionFillEl;
+var hudRoundEl, hudRoundTotalEl, hudBestEl, tensionFillEl, hudDistanceEl, hudScentEl, hudDecoysEl, decoyCountEl;
 var overlayPause, overlayResults, resultTitleEl, resultSubEl, resultRoundsEl, resultBestEl;
 var tileEls = [];
 
@@ -1509,6 +1508,7 @@ function renderTactilePreview(){
     for (var c = 0; c < COLS; c++){ tileEls[r][c].className = "tile"; }
   }
   state.bushes.forEach(function(b){ tileEls[b.row][b.col].classList.add("is-bush"); });
+  if (state.exitActive && state.exit){ tileEls[state.exit.row][state.exit.col].classList.add("is-exit"); }
   var onBush = !!bushAt(state.player);
   tileEls[state.player.row][state.player.col].classList.add(onBush ? "is-player-bush" : "is-player");
   if (state.monsterFlash){
@@ -1522,6 +1522,13 @@ function render(){
   hudRoundEl.textContent = state.round;
   var tensionPct = clamp(Math.round(currentFear() * 100), 6, 100);
   tensionFillEl.style.width = tensionPct + "%";
+  var distance = dist(state.player, state.monster);
+  hudDistanceEl.textContent = distanceLabel(distance);
+  hudScentEl.textContent = state.scent + "/3";
+  hudDecoysEl.textContent = state.decoys;
+  decoyCountEl.textContent = state.decoys;
+  document.getElementById("btn-decoy").disabled = state.decoys <= 0 || state.exitActive;
+  document.querySelector(".tension-track").setAttribute("aria-label", "위험도, 몬스터 추정 거리 " + distanceLabel(distance));
   try{ renderTactilePreview(); }catch(e){}
   try{ pushTactile(); }catch(e){}
   try{ drawPin(); }catch(e){}
@@ -1530,14 +1537,15 @@ function render(){
 function showResults(caught, survived, best, cause){
   resultTitleEl.textContent = caught ? "들켰어요…" : (state.roundsTotal > 0 ? "새벽이 밝았어요" : "정말 오래 버텼어요");
   var causeText = {
-    noise: "발소리를 낸 순간 바로 들켰어요.",
-    chase: "발소리를 쫓아온 몬스터에게 들켰어요.",
-    camp: "너무 오래 한자리에 있어서 들켰어요.",
-    luck: "몬스터가 우연히 다가와 들켰어요."
+    chase: "떠난 칸의 소리를 추적한 몬스터와 같은 칸에서 마주쳤어요.",
+    scent: "같은 자리에서 세 번 들어 냄새로 현재 위치를 추적당했어요.",
+    contact: "이동한 칸에서 몬스터와 마주쳤어요.",
+    timeout: "탈출구가 닫히기 전에 도착하지 못했어요."
   }[cause];
+  var replay = state.history.slice(-2).join(" → ");
   resultSubEl.textContent = caught
-    ? (causeText || "그래도 " + survived + "라운드나 숨죽였어요.")
-    : "끝까지 들키지 않았어요.";
+    ? (causeText || "몬스터와 같은 칸에서 마주쳤어요.") + (replay ? " 마지막 행동: " + replay : "")
+    : "탈출구에 도착했어요. 마지막 위치를 기억하고 추적을 따돌렸습니다.";
   resultRoundsEl.textContent = survived;
   resultBestEl.textContent = best;
   openDialog(overlayResults);
@@ -1547,13 +1555,13 @@ function showResults(caught, survived, best, cause){
    8. 턴 해석 / 게임 시작·종료 / 일시정지
    ============================================================ */
 function speakRules(){
-  speak("목표는 정해진 라운드까지 몬스터에게 안 들키고 버티는 거예요. 몬스터는 평소엔 아무렇게나 돌아다니지만, 가끔 내 위치를 정확히 향해 다가와요. 그 확률은 라운드가 지날수록 조금씩 올라가요. 방향키로 움직이면 소리가 나요. 몬스터가 가까이 있을 때 움직이면 그 자리에서 바로 들킬 수 있고, 멀리 있을 때 움직이면 몇 턴 동안 그 위치로 쫓아와요. 가만히 있는 게 상대적으로 안전하지만, 한자리에 너무 오래 웅크리면 위험이 서서히 쌓여요. 덤불에 숨으면 덜 들키지만 나도 발소리를 잘 못 들어요. 위험할수록 안내와 심장박동 소리가 점점 급해져요. 아주 가끔은 잘 숨었어도 몬스터가 우연히 다가와 마주칠 수 있어요. 완전히 안전한 방법은 없어요.");
+  speak("한 번 행동하면 몬스터도 한 칸 움직여요. 이동하면 떠난 칸에 소리가 남아 몬스터가 두 턴 동안 그 칸을 추적해요. 집중해서 들으면 빨간 칸으로 마지막 발소리 위치를 알 수 있지만, 같은 자리에서 세 번 들으면 냄새로 현재 위치를 추적당해요. 덤불은 냄새 추적을 막지만 정확한 발소리 칸을 들을 수 없어요. 소리 미끼는 두 번 사용할 수 있어요. 선택한 라운드까지 살아남으면 탈출구가 열리고, 세 턴 안에 도착해야 해요. 몬스터와 같은 칸에서 만나면 잡혀요.");
 }
 
 function currentFear(){
   var distance = dist(state.player, state.monster);
   var distFear = clamp(1 - distance / MAX_DIST, 0, 1);
-  var campFear = Math.min(1, Math.max(0, state.stayStreak - 1) * 0.2);
+  var campFear = state.scent / 3;
   return Math.max(distFear, campFear);
 }
 
@@ -1583,10 +1591,10 @@ function endGame(caught, cause){
   if (isNewBest) setBest(key, survived);
 
   var causeSpoken = {
-    noise: "발소리를 낸 순간 바로 들켰어요.",
-    chase: "발소리를 쫓아온 몬스터에게 들켰어요.",
-    camp: "너무 오래 한자리에 있어서 들켰어요.",
-    luck: "몬스터가 우연히 다가와 들켰어요."
+    chase: "떠난 칸의 소리를 추적한 몬스터와 마주쳤어요.",
+    scent: "냄새로 현재 위치를 추적당했어요.",
+    contact: "이동한 칸에서 몬스터와 마주쳤어요.",
+    timeout: "탈출구가 닫혔어요."
   }[cause];
 
   var line;
@@ -1622,6 +1630,13 @@ function startGame(roundsTotal){
   state.paused = false;
   state.gameOver = false;
   state.stayStreak = 0;
+  state.scent = 0;
+  state.decoys = 2;
+  state.lastHeard = null;
+  state.exit = null;
+  state.exitActive = false;
+  state.escapeTurns = 0;
+  state.history = [];
 
   overlayPause.hidden = true;
   overlayResults.hidden = true;
@@ -1631,8 +1646,39 @@ function startGame(roundsTotal){
 
   AudioEngine.resume();
   AudioEngine.setHeartbeat(currentFear(), !!bushAt(state.player));
-  speak("숨을 죽이세요. 발소리가 들리기 시작해요.");
+  speak("게임을 시작해요. 한 번 행동하면 몬스터도 한 칸 움직여요. 빨간 칸은 마지막으로 들은 위치예요.");
   render();
+}
+
+function chooseExit(){
+  var candidates = [];
+  for (var r = 0; r < ROWS; r++){
+    for (var c = 0; c < COLS; c++){
+      var t = { row:r, col:c };
+      var d = dist(state.player, t);
+      if (d >= 1 && d <= 3 && !sameTile(t, state.monster)) candidates.push(t);
+    }
+  }
+  state.exit = pickRandom(candidates);
+  state.exitActive = true;
+  state.escapeTurns = 3;
+}
+
+function deployDecoy(){
+  if (state.decoys <= 0){ speak("남은 소리 미끼가 없어요."); return false; }
+  var candidates = [];
+  for (var r = 0; r < ROWS; r++){
+    for (var c = 0; c < COLS; c++){
+      var t = { row:r, col:c };
+      if (dist(t, state.player) >= 4) candidates.push(t);
+    }
+  }
+  state.decoys--;
+  state.lastNoise = pickRandom(candidates);
+  state.alertTimer = 2;
+  state.scent = 0;
+  state.stayStreak = 0;
+  return true;
 }
 
 var Game = {};
@@ -1643,55 +1689,61 @@ Game.dispatch = function(action, dir){
   if (action === "repeat"){ repeatLast(); return; }
   if (state.paused || state.gameOver) return;
 
-  var noiseThisTurn = false;
+  var actionLabel = "";
+  var wasChasing = state.alertTimer > 0;
   if (action === "move"){
     var res = tryMove(dir);
     if (!res.ok){ AudioEngine.sting("denied"); speak("그쪽엔 더 갈 곳이 없어요."); return; }
-    noiseThisTurn = true;
+    actionLabel = "이동";
     AudioEngine.playerStep();
-  } else if (action === "stay"){
-    noiseThisTurn = false;
+  } else if (action === "stay" || action === "listen"){
+    action = "listen";
+    actionLabel = "듣기";
     state.stayStreak++;
+    state.scent = Math.min(3, state.scent + 1);
+    state.lastHeard = bushAt(state.player) ? null : { row:state.monster.row, col:state.monster.col };
+  } else if (action === "decoy"){
+    if (state.exitActive){ speak("탈출구가 열렸어요. 지금은 이동해야 해요."); return; }
+    if (!deployDecoy()) return;
+    actionLabel = "미끼";
   } else { return; }
 
-  // 발소리가 몬스터 근처에서 났다면 그 즉시 발각될 위험 — 여러 턴에 걸친 추격만으로는
-  // "계속 무작위로 움직이면 오히려 못 따라잡는" 역설이 생기므로, 소리 난 순간 자체의
-  // 즉각적인 위험을 별도로 반영한다.
-  var instantCaught = false;
-  var wasChasing = state.alertTimer > 0;
-  if (noiseThisTurn){
-    var practice = state.roundsTotal === 0;
-    var dNow = dist(state.player, state.monster);
-    var instantChance = dNow <= 1 ? (practice ? 0.3 : 0.5) : (dNow === 2 ? (practice ? 0.12 : 0.24) : 0);
-    if (instantChance > 0 && Math.random() < instantChance){
-      state.monsterPrev = state.monster;
-      state.monster = { row: state.player.row, col: state.player.col };
-      instantCaught = true;
-    }
+  state.history.push(actionLabel);
+  if (state.history.length > 6) state.history.shift();
+
+  if (sameTile(state.player, state.monster)){
+    endGame(true, "contact");
+    return;
   }
-  if (!instantCaught) stepMonster();
+
+  stepMonster();
   state.round++;
 
   if (sameTile(state.player, state.monster)){
     try{ triggerMonsterFlash(); }catch(e){}
-    var catchCause;
-    if (instantCaught) catchCause = "noise";
-    else if (wasChasing) catchCause = "chase";
-    else if (state.stayStreak >= 5) catchCause = "camp";
-    else catchCause = "luck";
+    var catchCause = state.scent >= 3 && !bushAt(state.player) ? "scent" : (wasChasing ? "chase" : "contact");
     endGame(true, catchCause);
     return;
   }
 
-  // 오디오/연출 쪽에서 혹시 예외가 나도 아래 render()·라운드종료 체크는 반드시 실행되도록 방어
   try{ triggerMonsterFlash(); }catch(e){}
   try{ updateAudioFeedback(); }catch(e){}
-  try{ updateNarrative(noiseThisTurn); }catch(e){}
-  render();
 
-  if (state.roundsTotal > 0 && state.round >= state.roundsTotal){
-    endGame(false);
+  if (state.exitActive){
+    if (sameTile(state.player, state.exit)){
+      endGame(false);
+      return;
+    }
+    state.escapeTurns--;
+    if (state.escapeTurns <= 0){
+      endGame(true, "timeout");
+      return;
+    }
+  } else if (state.roundsTotal > 0 && state.round >= state.roundsTotal){
+    chooseExit();
   }
+  try{ updateNarrative(action); }catch(e){}
+  render();
 };
 
 /* ============================================================
@@ -1787,6 +1839,10 @@ function init(){
   hudRoundTotalEl = document.getElementById("hud-round-total");
   hudBestEl = document.getElementById("hud-best");
   tensionFillEl = document.getElementById("tension-fill");
+  hudDistanceEl = document.getElementById("hud-distance");
+  hudScentEl = document.getElementById("hud-scent");
+  hudDecoysEl = document.getElementById("hud-decoys");
+  decoyCountEl = document.getElementById("decoy-count");
   overlayPause = document.getElementById("overlay-pause");
   overlayResults = document.getElementById("overlay-results");
   resultTitleEl = document.getElementById("result-title");
@@ -1838,6 +1894,7 @@ function init(){
     speakRules();
   });
   document.getElementById("btn-repeat").addEventListener("click", function(){ Game.dispatch("repeat"); });
+  document.getElementById("btn-decoy").addEventListener("click", function(){ Game.dispatch("decoy"); });
   document.getElementById("btn-pause").addEventListener("click", function(){ Game.dispatch("pause"); });
   document.getElementById("btn-resume").addEventListener("click", function(){ Game.dispatch("pause"); });
   document.getElementById("btn-quit-title").addEventListener("click", function(){
@@ -1850,7 +1907,7 @@ function init(){
   document.getElementById("btn-retry").addEventListener("click", function(){
     closeDialog(overlayResults, null);
     startGame(state.roundsTotal);
-    var stayBtn2 = document.querySelector('.dpad [data-action="stay"]');
+    var stayBtn2 = document.querySelector('.dpad [data-action="listen"]');
     if (stayBtn2) stayBtn2.focus();
   });
   document.getElementById("btn-to-title").addEventListener("click", function(){
@@ -1884,8 +1941,8 @@ function init(){
   for (var k = 0; k < dpadButtons.length; k++){
     dpadButtons[k].addEventListener("click", function(){ Game.dispatch("move", this.getAttribute("data-dir")); });
   }
-  var stayBtn = document.querySelector('.dpad [data-action="stay"]');
-  if (stayBtn) stayBtn.addEventListener("click", function(){ Game.dispatch("stay"); });
+  var stayBtn = document.querySelector('.dpad [data-action="listen"]');
+  if (stayBtn) stayBtn.addEventListener("click", function(){ Game.dispatch("listen"); });
 
   document.addEventListener("keydown", trapDialogFocus);
 
@@ -1894,6 +1951,7 @@ function init(){
     if (map[e.key]){ e.preventDefault(); Game.dispatch("move", map[e.key]); return; }
     var k = e.key.toLowerCase();
     if (k === "s"){ e.preventDefault(); Game.dispatch("stay"); return; }
+    if (k === "d"){ e.preventDefault(); Game.dispatch("decoy"); return; }
     if (k === "r"){ e.preventDefault(); Game.dispatch("repeat"); return; }
     if (k === "p"){ e.preventDefault(); Game.dispatch("pause"); return; }
     if (k === "h" || e.key === "?"){ e.preventDefault(); Game.dispatch("help"); return; }
