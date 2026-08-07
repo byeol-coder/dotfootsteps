@@ -604,6 +604,22 @@ button{ font-family:inherit; }
 .pinwrap canvas{ width:150px; display:block; border-radius:6px; background:#0B0A08; }
 .pinwrap .cap{ font-family:var(--dg-font-mono); font-size:10px; color:var(--dg-text-faint); text-align:center; margin-top:4px; }
 
+/* ============================================================
+   9. 언어 세그먼트 토글 (dot-games-host 표준: robo77의 ko/en 토글을
+   ko/en/ja 3언어로 확장한 형태 — 클래스/구조는 그대로 재사용)
+   ============================================================ */
+.lang-row{ width:100%; max-width: 360px; margin: 4px auto 0; }
+.lang-label{ font-family: var(--dg-font-mono); font-size: 11px; letter-spacing:.16em; text-transform:uppercase; color: var(--dg-text-faint); text-align:center; margin-bottom:8px; }
+.lang-seg{ display:flex; background: var(--dg-bg-alt); border:1px solid var(--dg-border); border-radius: var(--dg-radius-pill); padding:3px; width:100%; }
+.lang-seg button{
+  flex:1; border:none; background:transparent; color: var(--dg-text-muted);
+  font-size:13px; font-weight:600; padding:8px 6px; border-radius: var(--dg-radius-pill);
+  cursor:pointer; transition: background var(--dg-motion-fast), color var(--dg-motion-fast);
+}
+.lang-seg button.on{
+  background: var(--dg-accent-strong); color:#1C1815;
+}
+
 </style>
 </head>
 <body>
@@ -612,10 +628,10 @@ button{ font-family:inherit; }
   <!-- ============================================================
        타이틀 화면
        ============================================================ -->
-  <section class="screen is-active" id="screen-title" aria-label="발소리 타이틀 화면">
+  <section class="screen is-active" id="screen-title" data-i18n-aria="title.ariaScreen" aria-label="발소리 타이틀 화면">
     <div class="title-hero">
-      <p class="title-eyebrow">숨죽인 밤 · 촉각 추격 게임</p>
-      <h1 class="title-name">발소리</h1>
+      <p class="title-eyebrow" data-i18n="title.eyebrow">숨죽인 밤 · 촉각 추격 게임</p>
+      <h1 class="title-name" data-i18n="title.name">발소리</h1>
       <div class="footprint-trail" aria-hidden="true">
         <svg viewBox="0 0 24 62"><g class="footprint"><path d="M22.8,19 C22.9,25 22.6,29 22.1,32 C21.3,37 20.1,38.5 19.6,41 C19,45 18.2,46.5 18,49.5 C17.7,54.5 13.8,61 10,62 C6.2,61 3.7,54.5 3.4,49.5 C3.2,46.5 6.9,45 7.6,41 C8.5,37.5 3.3,32.5 2.6,28 C2.1,24.5 1.1,21 0.8,19 C6,15.3 17.5,15.3 22.8,19 Z"/><ellipse cx="4.3" cy="4.6" rx="3.1" ry="4.3" transform="rotate(-8 4.3 4.6)"/><ellipse cx="10.8" cy="3.0" rx="2.3" ry="3.2" transform="rotate(-2 10.8 3.0)"/><ellipse cx="16.3" cy="3.7" rx="1.75" ry="2.5" transform="rotate(12 16.3 3.7)"/><ellipse cx="20.6" cy="5.9" rx="1.35" ry="1.9" transform="rotate(24 20.6 5.9)"/><ellipse cx="23.4" cy="9.2" rx="1.0" ry="1.45" transform="rotate(34 23.4 9.2)"/></g></svg>
         <svg viewBox="0 0 24 62"><g class="footprint"><path d="M22.8,19 C22.9,25 22.6,29 22.1,32 C21.3,37 20.1,38.5 19.6,41 C19,45 18.2,46.5 18,49.5 C17.7,54.5 13.8,61 10,62 C6.2,61 3.7,54.5 3.4,49.5 C3.2,46.5 6.9,45 7.6,41 C8.5,37.5 3.3,32.5 2.6,28 C2.1,24.5 1.1,21 0.8,19 C6,15.3 17.5,15.3 22.8,19 Z"/><ellipse cx="4.3" cy="4.6" rx="3.1" ry="4.3" transform="rotate(-8 4.3 4.6)"/><ellipse cx="10.8" cy="3.0" rx="2.3" ry="3.2" transform="rotate(-2 10.8 3.0)"/><ellipse cx="16.3" cy="3.7" rx="1.75" ry="2.5" transform="rotate(12 16.3 3.7)"/><ellipse cx="20.6" cy="5.9" rx="1.35" ry="1.9" transform="rotate(24 20.6 5.9)"/><ellipse cx="23.4" cy="9.2" rx="1.0" ry="1.45" transform="rotate(34 23.4 9.2)"/></g></svg>
@@ -624,146 +640,155 @@ button{ font-family:inherit; }
       <p class="title-sub" id="title-mode-subtitle">발소리의 마지막 위치를 기억하고, 소리를 흘려 몬스터를 따돌린 뒤 탈출하세요.</p>
     </div>
 
+    <div class="lang-row" role="group" aria-labelledby="lang-label-title">
+      <div class="lang-label" id="lang-label-title" data-i18n="lang.label">언어 · Language · 言語</div>
+      <div class="lang-seg">
+        <button id="seg-lang-ko" class="on" type="button" aria-pressed="true" onclick="setLang('ko')">한국어</button>
+        <button id="seg-lang-en" type="button" aria-pressed="false" onclick="setLang('en')">English</button>
+        <button id="seg-lang-ja" type="button" aria-pressed="false" onclick="setLang('ja')">日本語</button>
+      </div>
+    </div>
+
     <div class="panel">
-      <p class="section-label">난이도 선택</p>
-      <div class="choice-grid" id="difficulty-grid" role="group" aria-label="난이도 선택">
-        <button class="choice-btn" data-rounds="0" type="button" aria-pressed="false"><strong>연습</strong><span>이동 · 듣기 · X자 점형</span></button>
-        <button class="choice-btn" data-rounds="5" type="button" aria-pressed="false"><strong>기본 5라운드</strong><span>덤불까지 익히기</span></button>
-        <button class="choice-btn is-selected" data-rounds="10" type="button" aria-pressed="true"><strong>10라운드</strong><span>미끼 · 탈출까지 한 판</span></button>
-        <button class="choice-btn" data-rounds="15" type="button" aria-pressed="false"><strong>15라운드</strong><span>도전</span></button>
-        <button class="choice-btn" data-rounds="20" type="button" aria-pressed="false"><strong>20라운드</strong><span>새벽까지 버티기</span></button>
+      <p class="section-label" data-i18n="title.diffLabel">난이도 선택</p>
+      <div class="choice-grid" id="difficulty-grid" role="group" data-i18n-aria="title.diffLabel" aria-label="난이도 선택">
+        <button class="choice-btn" data-rounds="0" type="button" aria-pressed="false"><strong data-i18n="diff.practice">연습</strong><span data-i18n="diff.practiceSub">이동 · 듣기 · X자 점형</span></button>
+        <button class="choice-btn" data-rounds="5" type="button" aria-pressed="false"><strong data-i18n="diff.basic">기본 5라운드</strong><span data-i18n="diff.basicSub">덤불까지 익히기</span></button>
+        <button class="choice-btn is-selected" data-rounds="10" type="button" aria-pressed="true"><strong data-i18n="diff.r10">10라운드</strong><span data-i18n="diff.r10Sub">미끼 · 탈출까지 한 판</span></button>
+        <button class="choice-btn" data-rounds="15" type="button" aria-pressed="false"><strong data-i18n="diff.r15">15라운드</strong><span data-i18n="diff.r15Sub">도전</span></button>
+        <button class="choice-btn" data-rounds="20" type="button" aria-pressed="false"><strong data-i18n="diff.r20">20라운드</strong><span data-i18n="diff.r20Sub">새벽까지 버티기</span></button>
       </div>
       <p class="mode-guide" id="mode-guide" aria-live="polite">10라운드: 덤불·소리 미끼·탈출까지 모두 사용해요.</p>
     </div>
 
     <div class="panel">
-      <p class="section-label">먼저 알아둘 규칙</p>
+      <p class="section-label" data-i18n="title.rulesLabel">먼저 알아둘 규칙</p>
       <ol class="rules-list">
-        <li id="rule-escape"><b>탈출</b> — 정해진 라운드를 버티면 탈출구가 열려요. 그때부터 3턴 안에 <b>이중 테두리</b> 탈출구로 이동하세요.</li>
-        <li><b>한 턴</b> — 내가 한 번 행동하면 몬스터도 한 칸 움직여요.</li>
-        <li><b>이동</b> — 한 칸 걷습니다. 방금 떠난 칸에 <b>발소리 흔적</b>이 남고, 몬스터는 2턴 동안 그곳을 확인해요. 몬스터와 같은 칸에 들어가면 게임 오버예요.</li>
-        <li><b>집중해서 듣기</b> — 움직이지 않고 마지막 발소리를 <b>X자 점형</b>으로 확인해요. X자는 다음에 다시 듣기 전까지 남아 있어요.</li>
+        <li id="rule-escape" data-i18n-html="rule.escape"><b>탈출</b> — 정해진 라운드를 버티면 탈출구가 열려요. 그때부터 3턴 안에 <b>이중 테두리</b> 탈출구로 이동하세요.</li>
+        <li data-i18n-html="rule.turn"><b>한 턴</b> — 내가 한 번 행동하면 몬스터도 한 칸 움직여요.</li>
+        <li data-i18n-html="rule.move"><b>이동</b> — 한 칸 걷습니다. 방금 떠난 칸에 <b>발소리 흔적</b>이 남고, 몬스터는 2턴 동안 그곳을 확인해요. 몬스터와 같은 칸에 들어가면 게임 오버예요.</li>
+        <li data-i18n-html="rule.listen"><b>집중해서 듣기</b> — 움직이지 않고 마지막 발소리를 <b>X자 점형</b>으로 확인해요. X자는 다음에 다시 듣기 전까지 남아 있어요.</li>
       </ol>
       <details class="rules-more" id="rules-more">
         <summary id="rules-more-summary">고급 규칙 보기 — 반복 듣기 · 덤불 · 미끼</summary>
         <ol class="rules-list" start="5">
-        <li id="rule-resonance"><b>반복해서 듣기</b> — 같은 자리에서 3번 들으면 잔향이 3단계가 되고, 몬스터가 내 위치를 포착해요.</li>
-        <li id="rule-bush"><b>덤불</b> — 발소리 잔향을 흡수해 진동 포착을 피할 수 있어요. 대신 정확한 칸 대신 <b>방향과 거리</b>만 들려요.</li>
-        <li id="rule-decoy"><b>소리 미끼</b> — 한 판에 2번 사용할 수 있어요. <b>네 점 점형</b>이 나타난 곳으로 몬스터를 2턴 동안 유인합니다.</li>
+        <li id="rule-resonance" data-i18n-html="rule.resonance"><b>반복해서 듣기</b> — 같은 자리에서 3번 들으면 잔향이 3단계가 되고, 몬스터가 내 위치를 포착해요.</li>
+        <li id="rule-bush" data-i18n-html="rule.bush"><b>덤불</b> — 발소리 잔향을 흡수해 진동 포착을 피할 수 있어요. 대신 정확한 칸 대신 <b>방향과 거리</b>만 들려요.</li>
+        <li id="rule-decoy" data-i18n-html="rule.decoy"><b>소리 미끼</b> — 한 판에 2번 사용할 수 있어요. <b>네 점 점형</b>이 나타난 곳으로 몬스터를 2턴 동안 유인합니다.</li>
         </ol>
       </details>
     </div>
 
     <div class="panel">
-      <p class="section-label">조작 방법</p>
-      <div class="controls-tabs" role="tablist" aria-label="조작 방식 선택">
-        <button class="controls-tab is-active" type="button" role="tab" aria-selected="true" data-controls-panel="keyboard">키보드</button>
-        <button class="controls-tab" type="button" role="tab" aria-selected="false" data-controls-panel="dotpad">닷패드</button>
+      <p class="section-label" data-i18n="controls.label">조작 방법</p>
+      <div class="controls-tabs" role="tablist" data-i18n-aria="controls.selectAria" aria-label="조작 방식 선택">
+        <button class="controls-tab is-active" type="button" role="tab" aria-selected="true" data-controls-panel="keyboard" data-i18n="controls.keyboard">키보드</button>
+        <button class="controls-tab" type="button" role="tab" aria-selected="false" data-controls-panel="dotpad" data-i18n="controls.dotpad">닷패드</button>
       </div>
       <div class="controls-legend" data-controls-panel="keyboard">
-        <div class="key-chip"><b>↑↓←→</b><span>이동<em>(소리가 나요)</em></span></div>
-        <div class="key-chip"><b>S</b><span>집중해서 듣기</span></div>
-        <div class="key-chip" id="control-decoy-keyboard"><b>D</b><span>소리 미끼<em>(2회)</em></span></div>
-        <div class="key-chip"><b>R</b><span>안내 다시 듣기</span></div>
-        <div class="key-chip"><b>P</b><span>일시정지</span></div>
-        <div class="key-chip"><b>H</b><span>도움말</span></div>
+        <div class="key-chip"><b>↑↓←→</b><span><span data-i18n="action.move">이동</span><em data-i18n="key.moveHint">(소리가 나요)</em></span></div>
+        <div class="key-chip"><b>S</b><span data-i18n="action.listen">집중해서 듣기</span></div>
+        <div class="key-chip" id="control-decoy-keyboard"><b>D</b><span><span data-i18n="action.decoy">소리 미끼</span><em data-i18n="key.decoyHint">(2회)</em></span></div>
+        <div class="key-chip"><b>R</b><span data-i18n="action.repeat">안내 다시 듣기</span></div>
+        <div class="key-chip"><b>P</b><span data-i18n="action.pause">일시정지</span></div>
+        <div class="key-chip"><b>H</b><span data-i18n="action.help">도움말</span></div>
       </div>
       <div class="controls-legend" data-controls-panel="dotpad" hidden>
-        <div class="key-chip"><b>F1~F4</b><span>상/하/좌/우 이동</span></div>
-        <div class="key-chip"><b>Pan 전체</b><span>집중해서 듣기</span></div>
-        <div class="key-chip" id="control-decoy-dotpad"><b>LPF2</b><span>소리 미끼<em>(2회)</em></span></div>
-        <div class="key-chip"><b>Pan 좌</b><span>안내 다시 듣기</span></div>
-        <div class="key-chip"><b>Pan 우</b><span>도움말</span></div>
-        <div class="key-chip"><b>LPF1</b><span>일시정지</span></div>
+        <div class="key-chip"><b>F1~F4</b><span data-i18n="key.dpadMove">상/하/좌/우 이동</span></div>
+        <div class="key-chip"><b>Pan 전체</b><span data-i18n="action.listen">집중해서 듣기</span></div>
+        <div class="key-chip" id="control-decoy-dotpad"><b>LPF2</b><span><span data-i18n="action.decoy">소리 미끼</span><em data-i18n="key.decoyHint">(2회)</em></span></div>
+        <div class="key-chip"><b>Pan 좌</b><span data-i18n="action.repeat">안내 다시 듣기</span></div>
+        <div class="key-chip"><b>Pan 우</b><span data-i18n="action.help">도움말</span></div>
+        <div class="key-chip"><b>LPF1</b><span data-i18n="action.pause">일시정지</span></div>
       </div>
     </div>
 
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-start" type="button">
         <svg class="icon" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-        시작하기
+        <span data-i18n="btn.start">시작하기</span>
       </button>
       <button class="btn btn-ghost" id="btn-howto" type="button">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="17" x2="12" y2="11"/><circle cx="12" cy="7.5" r=".6" fill="currentColor" stroke="none"/></svg>
-        규칙 듣기
+        <span data-i18n="btn.howto">규칙 듣기</span>
       </button>
       <button class="btn btn-ghost" id="btn-tutorial" type="button">
         <svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 11h.01M12 11h.01M16 11h.01M8 14h.01M12 14h.01M16 14h.01"/></svg>
-        촉각 튜토리얼
+        <span data-i18n="btn.tutorial">촉각 튜토리얼</span>
       </button>
       <button class="btn btn-ghost" id="btn-dotpad-title" type="button" aria-pressed="false">
         <svg class="icon" viewBox="0 0 24 24"><path d="M7 8l10 8l-5 4v-16l5 4l-10 8"/></svg>
-        <span class="dp-label">닷패드 연결</span>
+        <span class="dp-label" data-i18n="dp.connect">닷패드 연결</span>
       </button>
-      <button class="btn btn-ghost btn-sound" id="btn-sound-title" type="button" aria-pressed="true" aria-label="음성 켜짐, 누르면 끔"></button>
+      <button class="btn btn-ghost btn-sound" id="btn-sound-title" type="button" aria-pressed="true" data-i18n-aria="sound.onAria" aria-label="음성 켜짐, 누르면 끔"></button>
     </div>
   </section>
 
   <!-- ============================================================
        게임 화면
        ============================================================ -->
-  <section class="screen" id="screen-game" aria-label="발소리 게임 화면">
+  <section class="screen" id="screen-game" data-i18n-aria="game.ariaScreen" aria-label="발소리 게임 화면">
     <div class="hud-row">
-      <div class="hud-stat">라운드 <b id="hud-round">1</b><span id="hud-round-total">/10</span></div>
-      <div class="tension-track" role="img" aria-label="위험도">
+      <div class="hud-stat"><span data-i18n="hud.round">라운드</span> <b id="hud-round">1</b><span id="hud-round-total">/10</span></div>
+      <div class="tension-track" role="img" data-i18n-aria="hud.tensionAria" aria-label="위험도">
         <div class="tension-fill" id="tension-fill"></div>
       </div>
-      <div class="hud-stat">최고 <b id="hud-best">0</b></div>
+      <div class="hud-stat"><span data-i18n="hud.best">최고</span> <b id="hud-best">0</b></div>
     </div>
-    <div class="turn-status" aria-label="현재 상태">
-      <span>거리 <b id="hud-distance">멀리</b></span>
-      <span id="status-resonance">잔향 <b id="hud-resonance">0/3</b></span>
-      <span id="status-decoys">미끼 <b id="hud-decoys">2</b></span>
+    <div class="turn-status" data-i18n-aria="hud.statusAria" aria-label="현재 상태">
+      <span><span data-i18n="hud.distance">거리</span> <b id="hud-distance">멀리</b></span>
+      <span id="status-resonance"><span data-i18n="hud.resonance">잔향</span> <b id="hud-resonance">0/3</b></span>
+      <span id="status-decoys"><span data-i18n="action.decoy">소리 미끼</span> <b id="hud-decoys">2</b></span>
     </div>
 
     <div class="game-layout">
       <div>
-        <div class="tactile-preview" id="tactile-preview" role="img" aria-label="촉각 미리보기: 내 위치, 덤불, 마지막으로 들은 발소리와 탈출구"></div>
+        <div class="tactile-preview" id="tactile-preview" role="img" data-i18n-aria="game.tactilePreviewAria" aria-label="촉각 미리보기: 내 위치, 덤불, 마지막으로 들은 발소리와 탈출구"></div>
         <div class="tactile-legend" aria-hidden="true">
-          <span id="legend-player"><i class="tile is-player"></i>나</span>
-          <span id="legend-bush"><i class="tile is-bush"></i>덤불</span>
-          <span id="legend-heard"><i class="tile is-last-heard"></i>마지막 발소리(X)</span>
-          <span id="legend-exit"><i class="tile is-exit"></i>탈출구</span>
-          <span id="legend-decoy"><i class="tile is-decoy"></i>소리 미끼</span>
+          <span id="legend-player"><i class="tile is-player"></i><span data-i18n="legend.player">나</span></span>
+          <span id="legend-bush"><i class="tile is-bush"></i><span data-i18n="legend.bush">덤불</span></span>
+          <span id="legend-heard"><i class="tile is-last-heard"></i><span data-i18n="legend.heard">마지막 발소리(X)</span></span>
+          <span id="legend-exit"><i class="tile is-exit"></i><span data-i18n="legend.exit">탈출구</span></span>
+          <span id="legend-decoy"><i class="tile is-decoy"></i><span data-i18n="action.decoy">소리 미끼</span></span>
         </div>
         <div class="dpad">
-          <button class="dpad-up" data-dir="up" type="button" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
-          <button class="dpad-left" data-dir="left" type="button" aria-label="왼쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 5 5 12 12 19"/></svg></button>
-          <button class="dpad-stay" data-action="listen" type="button" aria-label="집중해서 듣기"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/></svg></button>
-          <button class="dpad-right" data-dir="right" type="button" aria-label="오른쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
-          <button class="dpad-down" data-dir="down" type="button" aria-label="아래로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></button>
+          <button class="dpad-up" data-dir="up" type="button" data-i18n-aria="dpad.up" aria-label="위로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+          <button class="dpad-left" data-dir="left" type="button" data-i18n-aria="dpad.left" aria-label="왼쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 5 5 12 12 19"/></svg></button>
+          <button class="dpad-stay" data-action="listen" type="button" data-i18n-aria="action.listen" aria-label="집중해서 듣기"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/></svg></button>
+          <button class="dpad-right" data-dir="right" type="button" data-i18n-aria="dpad.right" aria-label="오른쪽으로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+          <button class="dpad-down" data-dir="down" type="button" data-i18n-aria="dpad.down" aria-label="아래로 이동"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></button>
         </div>
       </div>
 
       <div class="side-panel">
         <div class="caption-box" id="caption-box" role="status" aria-live="polite">
-          <span class="caption-eyebrow">안내</span>
-          <span id="caption-text">시작하면 여기에 상황이 안내돼요.</span>
+          <span class="caption-eyebrow" data-i18n="caption.eyebrow">안내</span>
+          <span id="caption-text" data-i18n="caption.default">시작하면 여기에 상황이 안내돼요.</span>
         </div>
         <div class="btn-row">
           <button class="btn btn-ghost" id="btn-decoy" type="button">
             <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h2m3-4v8m4-11v14m4-10v6"/></svg>
-            소리 미끼 <span id="decoy-count">2</span>
+            <span data-i18n="action.decoy">소리 미끼</span> <span id="decoy-count">2</span>
           </button>
           <button class="btn btn-ghost" id="btn-repeat" type="button">
             <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
-            다시 듣기
+            <span data-i18n="btn.repeat">다시 듣기</span>
           </button>
           <button class="btn btn-ghost" id="btn-pause" type="button">
             <svg class="icon" viewBox="0 0 24 24"><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/></svg>
-            일시정지
+            <span data-i18n="action.pause">일시정지</span>
           </button>
         </div>
         <div class="btn-row">
           <button class="btn btn-ghost" id="btn-dotpad-game" type="button" aria-pressed="false">
             <svg class="icon" viewBox="0 0 24 24"><path d="M7 8l10 8l-5 4v-16l5 4l-10 8"/></svg>
-            <span class="dp-label">닷패드 연결</span>
+            <span class="dp-label" data-i18n="dp.connect">닷패드 연결</span>
           </button>
           <button class="btn btn-ghost" id="btn-pin-toggle" type="button" aria-pressed="false">
             <svg class="icon" viewBox="0 0 24 24"><path d="M5 5h.01M12 5h.01M19 5h.01M5 12h.01M12 12h.01M19 12h.01M5 19h.01M12 19h.01M19 19h.01"/></svg>
-            핀 미리보기
+            <span data-i18n="btn.pinPreview">핀 미리보기</span>
           </button>
-          <button class="btn btn-ghost btn-sound" id="btn-sound-game" type="button" aria-pressed="true" aria-label="음성 켜짐, 누르면 끔"></button>
+          <button class="btn btn-ghost btn-sound" id="btn-sound-game" type="button" aria-pressed="true" data-i18n-aria="sound.onAria" aria-label="음성 켜짐, 누르면 끔"></button>
         </div>
       </div>
     </div>
@@ -777,11 +802,11 @@ button{ font-family:inherit; }
      ============================================================ -->
 <div class="overlay" id="overlay-pause" role="dialog" aria-modal="true" aria-labelledby="pause-title" aria-describedby="pause-sub" tabindex="-1" hidden>
   <div class="panel overlay-card">
-    <h2 class="overlay-title" id="pause-title">일시정지</h2>
-    <p class="overlay-sub" id="pause-sub">숨은 여전히 죽이고 있어요. 준비되면 이어하기.</p>
+    <h2 class="overlay-title" id="pause-title" data-i18n="pause.title">일시정지</h2>
+    <p class="overlay-sub" id="pause-sub" data-i18n="pause.sub">숨은 여전히 죽이고 있어요. 준비되면 이어하기.</p>
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-resume" type="button">이어하기</button>
-      <button class="btn btn-ghost" id="btn-quit-title" type="button">그만하기</button>
+      <button class="btn btn-primary" id="btn-resume" type="button" data-i18n="pause.resume">이어하기</button>
+      <button class="btn btn-ghost" id="btn-quit-title" type="button" data-i18n="pause.quit">그만하기</button>
     </div>
   </div>
 </div>
@@ -796,9 +821,9 @@ button{ font-family:inherit; }
     <div class="tutorial-sample" aria-hidden="true"><i class="tile is-player" id="tutorial-pattern"></i></div>
     <p class="overlay-sub" id="tutorial-sub">중앙의 작은 채움 블록입니다.</p>
     <div class="btn-row">
-      <button class="btn btn-ghost" id="btn-tutorial-prev" type="button">이전</button>
+      <button class="btn btn-ghost" id="btn-tutorial-prev" type="button" data-i18n="tutorial.prev">이전</button>
       <button class="btn btn-primary" id="btn-tutorial-next" type="button">다음</button>
-      <button class="btn btn-ghost" id="btn-tutorial-close" type="button">닫기</button>
+      <button class="btn btn-ghost" id="btn-tutorial-close" type="button" data-i18n="tutorial.close">닫기</button>
     </div>
   </div>
 </div>
@@ -814,19 +839,19 @@ button{ font-family:inherit; }
     <h2 class="overlay-title" id="result-title">들켰어요…</h2>
     <p class="overlay-sub" id="result-sub">그래도 꽤 오래 버텼어요.</p>
     <div class="result-stats">
-      <div class="result-stat"><b id="result-rounds">0</b><span>생존 라운드</span></div>
-      <div class="result-stat"><b id="result-best">0</b><span>최고 기록</span></div>
+      <div class="result-stat"><b id="result-rounds">0</b><span data-i18n="result.roundsLabel">생존 라운드</span></div>
+      <div class="result-stat"><b id="result-best">0</b><span data-i18n="result.bestLabel">최고 기록</span></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-retry" type="button">다시 시도</button>
-      <button class="btn btn-ghost" id="btn-to-title" type="button">타이틀로</button>
+      <button class="btn btn-primary" id="btn-retry" type="button" data-i18n="result.retry">다시 시도</button>
+      <button class="btn btn-ghost" id="btn-to-title" type="button" data-i18n="result.toTitle">타이틀로</button>
     </div>
   </div>
 </div>
 
 <div class="pinwrap" id="pinwrap">
   <canvas id="pin" aria-hidden="true"></canvas>
-  <div class="cap">실제 핀 출력 (60×40)</div>
+  <div class="cap" data-i18n="pin.caption">실제 핀 출력 (60×40)</div>
 </div>
 
 <script src="./tts.js"></script>
@@ -835,7 +860,306 @@ button{ font-family:inherit; }
 "use strict";
 
 /* ============================================================
-   0. 상수 / 순수 유틸
+   0. 다국어(I18N) — dot-games-host 표준(robo77의 ko/en 토글)을
+   ko/en/ja 3언어로 확장. data-i18n 계열 속성 + t()/tf()로 정적/동적
+   텍스트를 모두 이 딕셔너리에서 가져온다.
+   ============================================================ */
+var LANG = "ko";
+try { var _sl = localStorage.getItem("dotFootsteps.lang"); if (_sl === "ko" || _sl === "en" || _sl === "ja") LANG = _sl; } catch (e) {}
+
+var TTS_LANG_TAG = { ko: "ko-KR", en: "en-US", ja: "ja-JP" };
+
+var I18N = {
+  "lang.label": { ko: "언어 · Language · 言語", en: "언어 · Language · 言語", ja: "언어 · Language · 言語" },
+
+  "title.ariaScreen": { ko: "발소리 타이틀 화면", en: "Footsteps title screen", ja: "フットステップス タイトル画面" },
+  "title.eyebrow": { ko: "숨죽인 밤 · 촉각 추격 게임", en: "A breath-held night · a tactile chase game", ja: "息を潜める夜 · 触覚追跡ゲーム" },
+  "title.name": { ko: "발소리", en: "Footsteps", ja: "フットステップス" },
+  "title.diffLabel": { ko: "난이도 선택", en: "Choose a difficulty", ja: "難易度を選択" },
+  "title.rulesLabel": { ko: "먼저 알아둘 규칙", en: "Rules to know first", ja: "最初に知っておくルール" },
+  "controls.label": { ko: "조작 방법", en: "Controls", ja: "操作方法" },
+  "controls.selectAria": { ko: "조작 방식 선택", en: "Choose control method", ja: "操作方式を選択" },
+  "controls.keyboard": { ko: "키보드", en: "Keyboard", ja: "キーボード" },
+  "controls.dotpad": { ko: "닷패드", en: "Dot Pad", ja: "ドットパッド" },
+
+  "diff.practice": { ko: "연습", en: "Practice", ja: "練習" },
+  "diff.practiceSub": { ko: "이동 · 듣기 · X자 점형", en: "Move · listen · X pattern", ja: "移動 · 傾聴 · X字パターン" },
+  "diff.basic": { ko: "기본 5라운드", en: "Basic · 5 rounds", ja: "基本 5ラウンド" },
+  "diff.basicSub": { ko: "덤불까지 익히기", en: "Learn bushes too", ja: "藪まで習得" },
+  "diff.r10": { ko: "10라운드", en: "10 rounds", ja: "10ラウンド" },
+  "diff.r10Sub": { ko: "미끼 · 탈출까지 한 판", en: "One run with decoys & escape", ja: "おとり・脱出まで一戦" },
+  "diff.r15": { ko: "15라운드", en: "15 rounds", ja: "15ラウンド" },
+  "diff.r15Sub": { ko: "도전", en: "Challenge", ja: "チャレンジ" },
+  "diff.r20": { ko: "20라운드", en: "20 rounds", ja: "20ラウンド" },
+  "diff.r20Sub": { ko: "새벽까지 버티기", en: "Survive till dawn", ja: "夜明けまで耐える" },
+
+  "rule.escape": {
+    ko: "<b>탈출</b> — 정해진 라운드를 버티면 탈출구가 열려요. 그때부터 3턴 안에 <b>이중 테두리</b> 탈출구로 이동하세요.",
+    en: "<b>Escape</b> — survive the set number of rounds and an exit opens. From then, reach the <b>double-bordered</b> exit within 3 turns.",
+    ja: "<b>脱出</b> — 決められたラウンドを生き延びると出口が開きます。それから3ターン以内に<b>二重枠</b>の出口へ移動してください。"
+  },
+  "rule.turn": {
+    ko: "<b>한 턴</b> — 내가 한 번 행동하면 몬스터도 한 칸 움직여요.",
+    en: "<b>One turn</b> — every time you act, the monster moves one tile too.",
+    ja: "<b>1ターン</b> — あなたが1回行動すると、モンスターも1マス動きます。"
+  },
+  "rule.move": {
+    ko: "<b>이동</b> — 한 칸 걷습니다. 방금 떠난 칸에 <b>발소리 흔적</b>이 남고, 몬스터는 2턴 동안 그곳을 확인해요. 몬스터와 같은 칸에 들어가면 게임 오버예요.",
+    en: "<b>Move</b> — step one tile. The tile you left keeps a <b>footstep trace</b> that the monster checks for 2 turns. Entering the monster's tile ends the game.",
+    ja: "<b>移動</b> — 1マス歩きます。離れたマスには<b>足音の跡</b>が残り、モンスターは2ターンそこを確認します。モンスターと同じマスに入るとゲームオーバーです。"
+  },
+  "rule.listen": {
+    ko: "<b>집중해서 듣기</b> — 움직이지 않고 마지막 발소리를 <b>X자 점형</b>으로 확인해요. X자는 다음에 다시 듣기 전까지 남아 있어요.",
+    en: "<b>Listen closely</b> — stay still and check the monster's last footstep as an <b>X pattern</b>. It stays until you listen again.",
+    ja: "<b>集中して聞く</b> — 動かずに最後の足音を<b>X字パターン</b>で確認します。Xは次に聞くまで残ります。"
+  },
+  "rule.resonance": {
+    ko: "<b>반복해서 듣기</b> — 같은 자리에서 3번 들으면 잔향이 3단계가 되고, 몬스터가 내 위치를 포착해요.",
+    en: "<b>Listening repeatedly</b> — listen 3 times from the same spot and the resonance hits stage 3, letting the monster pinpoint you.",
+    ja: "<b>繰り返し聞く</b> — 同じ場所で3回聞くと残響が3段階になり、モンスターに位置を捕捉されます。"
+  },
+  "rule.bush": {
+    ko: "<b>덤불</b> — 발소리 잔향을 흡수해 진동 포착을 피할 수 있어요. 대신 정확한 칸 대신 <b>방향과 거리</b>만 들려요.",
+    en: "<b>Bushes</b> — absorb footstep resonance so you avoid being pinpointed. In exchange, you only hear <b>direction and distance</b>, not the exact tile.",
+    ja: "<b>藪</b> — 足音の残響を吸収して振動の捕捉を避けられます。ただし正確なマスではなく<b>方向と距離</b>だけが聞こえます。"
+  },
+  "rule.decoy": {
+    ko: "<b>소리 미끼</b> — 한 판에 2번 사용할 수 있어요. <b>네 점 점형</b>이 나타난 곳으로 몬스터를 2턴 동안 유인합니다.",
+    en: "<b>Sound decoy</b> — usable twice per run. Lures the monster for 2 turns to where the <b>four-dot pattern</b> appears.",
+    ja: "<b>音のおとり</b> — 1プレイで2回使えます。<b>四点パターン</b>が現れた場所へモンスターを2ターン誘導します。"
+  },
+
+  "key.moveHint": { ko: "(소리가 나요)", en: "(makes noise)", ja: "(音が出ます)" },
+  "key.decoyHint": { ko: "(2회)", en: "(x2)", ja: "(2回)" },
+  "key.dpadMove": { ko: "상/하/좌/우 이동", en: "Move up/down/left/right", ja: "上下左右に移動" },
+
+  "action.move": { ko: "이동", en: "Move", ja: "移動" },
+  "action.listen": { ko: "집중해서 듣기", en: "Listen closely", ja: "集中して聞く" },
+  "action.decoy": { ko: "소리 미끼", en: "Sound decoy", ja: "音のおとり" },
+  "action.repeat": { ko: "안내 다시 듣기", en: "Repeat last hint", ja: "案内をもう一度聞く" },
+  "action.pause": { ko: "일시정지", en: "Pause", ja: "一時停止" },
+  "action.help": { ko: "도움말", en: "Help", ja: "ヘルプ" },
+
+  "btn.start": { ko: "시작하기", en: "Start", ja: "始める" },
+  "btn.howto": { ko: "규칙 듣기", en: "Hear the rules", ja: "ルールを聞く" },
+  "btn.tutorial": { ko: "촉각 튜토리얼", en: "Tactile tutorial", ja: "触覚チュートリアル" },
+  "btn.repeat": { ko: "다시 듣기", en: "Repeat", ja: "もう一度聞く" },
+  "btn.pinPreview": { ko: "핀 미리보기", en: "Pin preview", ja: "ピン プレビュー" },
+
+  "dp.connect": { ko: "닷패드 연결", en: "Connect Dot Pad", ja: "ドットパッド接続" },
+  "dp.connected": { ko: "닷패드 연결됨", en: "Dot Pad connected", ja: "ドットパッド接続済み" },
+
+  "sound.onAria": { ko: "음성 켜짐, 누르면 끔", en: "Voice on, press to mute", ja: "音声オン、押すとミュート" },
+  "sound.offAria": { ko: "음성 꺼짐, 누르면 켬", en: "Voice off, press to unmute", ja: "音声オフ、押すとオン" },
+
+  "game.ariaScreen": { ko: "발소리 게임 화면", en: "Footsteps game screen", ja: "フットステップス ゲーム画面" },
+  "game.tactilePreviewAria": { ko: "촉각 미리보기: 내 위치, 덤불, 마지막으로 들은 발소리와 탈출구", en: "Tactile preview: my position, bushes, the last footstep heard, and the exit", ja: "触覚プレビュー：自分の位置、藪、最後に聞いた足音、出口" },
+  "hud.round": { ko: "라운드", en: "Round", ja: "ラウンド" },
+  "hud.best": { ko: "최고", en: "Best", ja: "最高" },
+  "hud.distance": { ko: "거리", en: "Distance", ja: "距離" },
+  "hud.resonance": { ko: "잔향", en: "Resonance", ja: "残響" },
+  "hud.tensionAria": { ko: "위험도", en: "Danger level", ja: "危険度" },
+  "hud.tensionAriaDynamic": { ko: "위험도, 몬스터 추정 거리 {0}", en: "Danger level, estimated monster distance: {0}", ja: "危険度、モンスターの推定距離：{0}" },
+  "hud.statusAria": { ko: "현재 상태", en: "Current status", ja: "現在の状態" },
+  "hud.practiceSuffix": { ko: " · 연습", en: " · Practice", ja: " · 練習" },
+
+  "legend.player": { ko: "나", en: "Me", ja: "自分" },
+  "legend.bush": { ko: "덤불", en: "Bush", ja: "藪" },
+  "legend.heard": { ko: "마지막 발소리(X)", en: "Last footstep (X)", ja: "最後の足音(X)" },
+  "legend.exit": { ko: "탈출구", en: "Exit", ja: "出口" },
+
+  "dpad.up": { ko: "위로 이동", en: "Move up", ja: "上に移動" },
+  "dpad.down": { ko: "아래로 이동", en: "Move down", ja: "下に移動" },
+  "dpad.left": { ko: "왼쪽으로 이동", en: "Move left", ja: "左に移動" },
+  "dpad.right": { ko: "오른쪽으로 이동", en: "Move right", ja: "右に移動" },
+
+  "caption.eyebrow": { ko: "안내", en: "Hint", ja: "案内" },
+  "caption.default": { ko: "시작하면 여기에 상황이 안내돼요.", en: "Once you start, updates will appear here.", ja: "開始すると、ここに状況が表示されます。" },
+
+  "pause.title": { ko: "일시정지", en: "Paused", ja: "一時停止" },
+  "pause.sub": { ko: "숨은 여전히 죽이고 있어요. 준비되면 이어하기.", en: "Still holding your breath. Resume when ready.", ja: "まだ息を潜めています。準備できたら再開してください。" },
+  "pause.resume": { ko: "이어하기", en: "Resume", ja: "再開する" },
+  "pause.quit": { ko: "그만하기", en: "Quit", ja: "やめる" },
+
+  "tutorial.prev": { ko: "이전", en: "Prev", ja: "前へ" },
+  "tutorial.next": { ko: "다음", en: "Next", ja: "次へ" },
+  "tutorial.restart": { ko: "처음부터", en: "Restart", ja: "最初から" },
+  "tutorial.close": { ko: "닫기", en: "Close", ja: "閉じる" },
+  "tutorial.player.title": { ko: "내 위치", en: "My position", ja: "自分の位置" },
+  "tutorial.player.text": { ko: "중앙의 작은 채움 블록입니다. 손끝으로 작은 사각형을 확인하세요.", en: "A small filled block at the center. Feel for the small square with your fingertip.", ja: "中央にある小さな塗りブロックです。指先で小さな四角を確認してください。" },
+  "tutorial.sound.title": { ko: "마지막 발소리", en: "Last footstep", ja: "最後の足音" },
+  "tutorial.sound.text": { ko: "X자 점형입니다. 몬스터의 현재 위치가 아니라 마지막으로 들은 위치이며 다음 듣기까지 유지됩니다.", en: "An X pattern. It's not the monster's current position but where you last heard it, and it stays until your next listen.", ja: "X字パターンです。モンスターの現在位置ではなく最後に聞いた位置で、次に聞くまで維持されます。" },
+  "tutorial.bush.title": { ko: "덤불", en: "Bush", ja: "藪" },
+  "tutorial.bush.text": { ko: "속이 빈 단일 테두리입니다. 발소리 잔향을 흡수하지만 정확한 발소리 칸은 들리지 않습니다.", en: "A single hollow border. It absorbs footstep resonance, but you won't hear the exact footstep tile.", ja: "中が空いた単一の枠です。足音の残響を吸収しますが、正確な足音のマスは聞こえません。" },
+  "tutorial.exit.title": { ko: "탈출구", en: "Exit", ja: "出口" },
+  "tutorial.exit.text": { ko: "안과 밖에 선이 있는 이중 테두리입니다. 탈출 단계에서 이 점형으로 이동하세요.", en: "A double border with lines inside and out. Move to this pattern during the escape phase.", ja: "内と外に線がある二重枠です。脱出フェーズではこのパターンへ移動してください。" },
+  "tutorial.decoy.title": { ko: "소리 미끼", en: "Sound decoy", ja: "音のおとり" },
+  "tutorial.decoy.text": { ko: "서로 떨어진 네 점입니다. 한 판에 두 번 몬스터를 다른 곳으로 유인할 수 있습니다.", en: "Four dots spaced apart. You can lure the monster elsewhere twice per run.", ja: "互いに離れた四つの点です。1プレイで2回、モンスターを別の場所へ誘導できます。" },
+
+  "result.roundsLabel": { ko: "생존 라운드", en: "Rounds survived", ja: "生存ラウンド" },
+  "result.bestLabel": { ko: "최고 기록", en: "Best record", ja: "最高記録" },
+  "result.retry": { ko: "다시 시도", en: "Retry", ja: "リトライ" },
+  "result.toTitle": { ko: "타이틀로", en: "To title", ja: "タイトルへ" },
+
+  "pin.caption": { ko: "실제 핀 출력 (60×40)", en: "Live pin output (60×40)", ja: "実機ピン出力(60×40)" },
+
+  "guide.practice": { ko: "연습: 이동, 집중해서 듣기, X자 점형만 익혀요. 시간 제한은 없어요.", en: "Practice: learn just moving, listening, and the X pattern. No time limit.", ja: "練習：移動、集中して聞く、X字パターンだけを覚えます。時間制限はありません。" },
+  "guide.basic": { ko: "기본 5라운드: 덤불과 잔향까지 익혀요. 미끼와 탈출은 아직 나오지 않아요.", en: "Basic, 5 rounds: also learn bushes and resonance. No decoys or escape yet.", ja: "基本5ラウンド：藪と残響まで覚えます。おとりと脱出はまだ出てきません。" },
+  "guide.full": { ko: "{0}라운드: 덤불·소리 미끼·탈출까지 모두 사용해요.", en: "{0} rounds: uses bushes, sound decoys, and the escape phase.", ja: "{0}ラウンド：藪・音のおとり・脱出まですべて使います。" },
+
+  "titleSub.practice": { ko: "몬스터와 거리를 두고, X자 점형으로 마지막 발소리를 확인하세요.", en: "Keep your distance from the monster and check its last footstep with the X pattern.", ja: "モンスターと距離を取り、X字パターンで最後の足音を確認してください。" },
+  "titleSub.basic": { ko: "발소리를 기억하고, 덤불을 이용해 몬스터를 따돌리세요.", en: "Remember the footsteps and use bushes to shake off the monster.", ja: "足音を記憶し、藪を利用してモンスターを振り切ってください。" },
+  "titleSub.full": { ko: "발소리의 마지막 위치를 기억하고, 소리를 흘려 몬스터를 따돌린 뒤 탈출하세요.", en: "Remember the last footstep location, throw sounds to shake off the monster, then escape.", ja: "足音の最後の位置を記憶し、音を流してモンスターを振り切ってから脱出してください。" },
+  "rulesMore.basic": { ko: "고급 규칙 보기 — 반복 듣기 · 덤불", en: "Advanced rules — repeated listening · bushes", ja: "上級ルールを見る — 繰り返し聞く · 藪" },
+  "rulesMore.full": { ko: "고급 규칙 보기 — 반복 듣기 · 덤불 · 미끼", en: "Advanced rules — repeated listening · bushes · decoys", ja: "上級ルールを見る — 繰り返し聞く · 藪 · おとり" },
+
+  "dist.near": { ko: "바로 옆", en: "right next to you", ja: "すぐ隣" },
+  "dist.mid": { ko: "가까움", en: "close", ja: "近い" },
+  "dist.far": { ko: "멀리", en: "far", ja: "遠い" },
+
+  "pos.unknown": { ko: "아직 확인되지 않음", en: "not checked yet", ja: "まだ確認されていません" },
+  "pos.same": { ko: "현재 나와 같은 칸", en: "the same tile as me right now", ja: "現在自分と同じマス" },
+  "pos.up": { ko: "위쪽 {0}칸", en: "{0} tile(s) up", ja: "上に{0}マス" },
+  "pos.down": { ko: "아래쪽 {0}칸", en: "{0} tile(s) down", ja: "下に{0}マス" },
+  "pos.left": { ko: "왼쪽 {0}칸", en: "{0} tile(s) left", ja: "左に{0}マス" },
+  "pos.right": { ko: "오른쪽 {0}칸", en: "{0} tile(s) right", ja: "右に{0}マス" },
+  "pos.joiner": { ko: ", ", en: ", ", ja: "、" },
+
+  "dir.unknown": { ko: "알 수 없는 방향", en: "an unknown direction", ja: "不明な方向" },
+  "dir.same": { ko: "바로 이곳", en: "right here", ja: "まさにここ" },
+  "dir.up": { ko: "위쪽", en: "up", ja: "上" },
+  "dir.down": { ko: "아래쪽", en: "down", ja: "下" },
+  "dir.left": { ko: "왼쪽", en: "left", ja: "左" },
+  "dir.right": { ko: "오른쪽", en: "right", ja: "右" },
+  "dir.joiner": { ko: "과 ", en: " and ", ja: "と" },
+
+  "grid.position": { ko: "위에서 {0}번째 행, 왼쪽에서 {1}번째 열", en: "row {0} from the top, column {1} from the left", ja: "上から{0}行目、左から{1}列目" },
+
+  "map.intro": { ko: "촉각 지도. 내 위치 {0}.", en: "Tactile map. My position: {0}.", ja: "触覚マップ。自分の位置は{0}。" },
+  "map.bushes": { ko: "덤불 {0}.", en: "Bushes: {0}.", ja: "藪：{0}。" },
+  "map.lastHeard": { ko: "마지막 발소리 X자 점형은 내 위치에서 {0}.", en: "The last-footstep X pattern is {0} from me.", ja: "最後の足音のX字パターンは自分から見て{0}。" },
+  "map.decoy": { ko: "소리 미끼 네 점은 내 위치에서 {0}.", en: "The four-dot sound decoy is {0} from me.", ja: "音のおとりの四点は自分から見て{0}。" },
+  "map.exit": { ko: "탈출구 이중 테두리는 내 위치에서 {0}.", en: "The double-bordered exit is {0} from me.", ja: "出口の二重枠は自分から見て{0}。" },
+
+  "narrate.exitActive": { ko: "탈출구가 열렸어요. 내 위치에서 {0}에 있는 이중 테두리 점형으로 이동하세요. 남은 시간 {1}턴.", en: "The exit has opened. Move to the double-bordered pattern {0} from you. {1} turn(s) left.", ja: "出口が開きました。自分から見て{0}にある二重枠のパターンへ移動してください。残り{1}ターン。" },
+  "narrate.decoyThrown": { ko: "소리 미끼를 내 위치에서 {0}에 던졌어요. 네 점 점형으로 표시되며 몬스터가 2턴 동안 따라가요.", en: "You threw a sound decoy {0} from you. It shows as a four-dot pattern and the monster follows it for 2 turns.", ja: "自分から見て{0}に音のおとりを投げました。四点パターンで表示され、モンスターは2ターンそちらへ向かいます。" },
+  "narrate.moveBush": { ko: "덤불 속으로 이동했어요. 잔향이 흡수돼 위치 포착을 피할 수 있지만 정확한 발소리 칸은 알 수 없어요.", en: "You moved into a bush. Resonance is absorbed so you avoid being pinpointed, but you won't know the exact footstep tile.", ja: "藪の中へ移動しました。残響が吸収され位置の捕捉を避けられますが、正確な足音のマスは分かりません。" },
+  "narrate.moveBase": { ko: "발소리 흔적을 남겼어요. 몬스터가 2턴 동안 그 칸을 추적해요.", en: "You left a footstep trace. The monster will track that tile for 2 turns.", ja: "足音の跡を残しました。モンスターは2ターンそのマスを追跡します。" },
+  "narrate.moveLastHeardSuffix": { ko: " 마지막 발소리 X자는 현재 내 위치에서 {0}에 있어요.", en: " The last-footstep X is now {0} from me.", ja: " 最後の足音のXは現在自分から見て{0}にあります。" },
+  "narrate.bushListen": { ko: "덤불 때문에 정확한 칸은 알 수 없어요. {0}에서 {1} 발소리가 들려요.", en: "The bush keeps you from knowing the exact tile. You hear footsteps {1} to the {0}.", ja: "藪のせいで正確なマスは分かりません。{0}から{1}足音が聞こえます。" },
+  "narrate.resonanceTrigger": { ko: "진동 포착! 이 자리에 잔향이 쌓였어요. 몬스터가 내 위치를 향해 와요—지금 이동하세요.", en: "Pinpointed! Resonance has built up here. The monster is heading straight for you — move now.", ja: "捕捉されました！ここに残響が蓄積しました。モンスターがあなたに向かっています—今すぐ移動してください。" },
+  "narrate.listenDone": { ko: "집중 완료. 마지막 발소리 X자는 내 위치에서 {0}이고, 현재 추정 거리는 {1}예요.", en: "Listening done. The last-footstep X is {0} from me, and the estimated distance is now {1}.", ja: "集中完了。最後の足音のXは自分から見て{0}で、現在の推定距離は{1}です。" },
+  "narrate.resonanceSuffix": { ko: " 잔향 {0}/3.", en: " Resonance {0}/3.", ja: " 残響{0}/3。" },
+  "narrate.roundMarker": { ko: "{0}라운드째예요. ", en: "Round {0}. ", ja: "{0}ラウンド目です。 " },
+
+  "rules.base": { ko: "한 번 행동하면 몬스터도 한 칸 움직여요. 이동하면 떠난 칸에 발소리 흔적이 남아 몬스터가 두 턴 동안 그 칸을 추적해요. 집중해서 들으면 X자 점형과 방향, 칸 수로 마지막 발소리 위치를 알 수 있어요. 몬스터와 같은 칸에서 만나면 잡혀요.", en: "Every action you take, the monster moves one tile too. Moving leaves a footstep trace on the tile you left, which the monster tracks for two turns. Listening closely tells you the last footstep's location as an X pattern, plus direction and tile count. Meeting the monster on the same tile means you're caught.", ja: "1回行動するとモンスターも1マス動きます。移動すると離れたマスに足音の跡が残り、モンスターは2ターンそのマスを追跡します。集中して聞くと、X字パターンと方向、マス数で最後の足音の位置が分かります。モンスターと同じマスで出会うと捕まります。" },
+  "rules.resonance": { ko: " 같은 자리에서 세 번 들으면 잔향이 쌓여 몬스터가 내 위치를 포착해요.", en: " Listen three times from the same spot and resonance builds up, letting the monster pinpoint you.", ja: " 同じ場所で3回聞くと残響が蓄積し、モンスターに位置を捕捉されます。" },
+  "rules.bushes": { ko: " 덤불은 단일 테두리 점형이며 잔향을 흡수하지만 정확한 발소리 칸은 들을 수 없어요.", en: " Bushes are a single-border pattern that absorb resonance, but you won't hear the exact footstep tile.", ja: " 藪は単一枠のパターンで残響を吸収しますが、正確な足音のマスは聞けません。" },
+  "rules.decoy": { ko: " 소리 미끼는 네 점 점형이고 두 번 사용할 수 있어요.", en: " A sound decoy is a four-dot pattern usable twice.", ja: " 音のおとりは四点パターンで、2回使用できます。" },
+  "rules.exit": { ko: " 선택한 라운드까지 살아남으면 이중 테두리 탈출구가 열리고, 세 턴 안에 도착해야 해요.", en: " Survive to the chosen round and a double-bordered exit opens — you must reach it within three turns.", ja: " 選択したラウンドまで生き延びると二重枠の出口が開き、3ターン以内に到着する必要があります。" },
+  "rules.basicEnd": { ko: " 다섯 라운드를 버티면 기본 게임을 마쳐요.", en: " Survive five rounds to finish the basic game.", ja: " 5ラウンド生き延びると基本ゲームは終了です。" },
+  "rules.practiceEnd": { ko: " 연습은 시간 제한이 없어요.", en: " Practice has no time limit.", ja: " 練習には時間制限はありません。" },
+
+  "cause.chase": { ko: "떠난 칸의 소리를 추적한 몬스터와 같은 칸에서 마주쳤어요.", en: "The monster tracked the sound from the tile you left and met you there.", ja: "離れたマスの音を追跡したモンスターと同じマスで出会いました。" },
+  "cause.resonance": { ko: "같은 자리에서 반복해 들은 진동을 몬스터가 포착했어요.", en: "The monster pinpointed the resonance from listening repeatedly in the same spot.", ja: "同じ場所で繰り返し聞いた振動をモンスターに捕捉されました。" },
+  "cause.contact": { ko: "이동한 칸에서 몬스터와 마주쳤어요.", en: "You ran into the monster on the tile you moved to.", ja: "移動したマスでモンスターと出会いました。" },
+  "cause.timeout": { ko: "탈출구가 닫히기 전에 도착하지 못했어요.", en: "You didn't reach the exit before it closed.", ja: "出口が閉まる前に到着できませんでした。" },
+  "cause.fallback": { ko: "몬스터와 같은 칸에서 마주쳤어요.", en: "You met the monster on the same tile.", ja: "モンスターと同じマスで出会いました。" },
+
+  "causeSpoken.chase": { ko: "떠난 칸의 소리를 추적한 몬스터와 마주쳤어요.", en: "The monster tracked the sound from the tile you left and found you.", ja: "離れたマスの音を追跡したモンスターと出会いました。" },
+  "causeSpoken.resonance": { ko: "반복해서 들은 진동을 몬스터가 포착했어요.", en: "The monster pinpointed the resonance from your repeated listening.", ja: "繰り返し聞いた振動をモンスターに捕捉されました。" },
+  "causeSpoken.contact": { ko: "이동한 칸에서 몬스터와 마주쳤어요.", en: "You ran into the monster on the tile you moved to.", ja: "移動したマスでモンスターと出会いました。" },
+  "causeSpoken.timeout": { ko: "탈출구가 닫혔어요.", en: "The exit closed.", ja: "出口が閉まりました。" },
+
+  "result.lastActions": { ko: " 마지막 행동: {0}", en: " Last actions: {0}", ja: " 最後の行動：{0}" },
+  "result.basicSub": { ko: "{0}라운드를 버텼어요. 덤불과 잔향을 익혔어요.", en: "You survived {0} round(s). You learned bushes and resonance.", ja: "{0}ラウンド生き延びました。藪と残響を習得しました。" },
+  "result.escapeSub": { ko: "탈출구에 도착했어요. 마지막 위치를 기억하고 추적을 따돌렸습니다.", en: "You reached the exit. You remembered the last location and shook off the chase.", ja: "出口に到着しました。最後の位置を記憶し、追跡を振り切りました。" },
+  "result.title.caught": { ko: "들켰어요…", en: "Caught…", ja: "見つかりました…" },
+  "result.title.basicDone": { ko: "기본 훈련 완료!", en: "Basic training complete!", ja: "基本トレーニング完了！" },
+  "result.title.dawn": { ko: "새벽이 밝았어요", en: "Dawn has broken", ja: "夜が明けました" },
+  "result.title.endless": { ko: "정말 오래 버텼어요", en: "You survived a very long time", ja: "本当に長く生き延びました" },
+
+  "speak.caught": { ko: "들켰어요… {0} {1}라운드 버텼어요.", en: "Caught… {0} You survived {1} round(s).", ja: "見つかりました… {0} {1}ラウンド生き延びました。" },
+  "speak.basicDone": { ko: "기본 훈련 완료! {0}라운드를 버텼어요. 덤불과 잔향을 익혔어요.", en: "Basic training complete! You survived {0} round(s). You learned bushes and resonance.", ja: "基本トレーニング完了！{0}ラウンド生き延びました。藪と残響を習得しました。" },
+  "speak.dawn": { ko: "새벽이 밝았어요. 살았어요! {0}라운드를 버텼어요.", en: "Dawn has broken. You survived! You made it through {0} round(s).", ja: "夜が明けました。生き延びました！{0}ラウンド持ちこたえました。" },
+  "speak.endless": { ko: "정말 오래 버텼어요! {0}라운드를 버텼어요.", en: "You survived a very long time! You made it through {0} round(s).", ja: "本当に長く生き延びました！{0}ラウンド持ちこたえました。" },
+  "speak.newBest": { ko: " 최고 기록이에요!", en: " That's a new best!", ja: " 最高記録です！" },
+  "speak.bestIs": { ko: " 최고 기록은 {0}라운드예요.", en: " The best record is {0} round(s).", ja: " 最高記録は{0}ラウンドです。" },
+
+  "speak.gameStart": { ko: "게임을 시작해요. {0}한 번 행동하면 몬스터도 한 칸 움직여요. 내 위치는 중앙의 작은 채움 블록이고, 마지막 발소리는 다음 듣기까지 유지되는 X자 점형이에요.", en: "Starting the game. {0}Every action you take, the monster moves one tile too. My position is the small filled block at the center, and the last footstep is an X pattern that stays until the next listen.", ja: "ゲームを開始します。{0}1回行動するとモンスターも1マス動きます。自分の位置は中央の小さな塗りブロックで、最後の足音は次に聞くまで残るX字パターンです。" },
+  "speak.gameStartPractice": { ko: "연습에서는 이동하고, 집중해서 들어 X자 점형을 확인하세요. ", en: "In practice, move and listen closely to check the X pattern. ", ja: "練習では移動し、集中して聞いてX字パターンを確認してください。 " },
+
+  "speak.blocked": { ko: "그쪽엔 더 갈 곳이 없어요.", en: "There's nowhere further to go that way.", ja: "そちらにはこれ以上進めません。" },
+  "speak.decoyDuringExit": { ko: "탈출구가 열렸어요. 지금은 이동해야 해요.", en: "The exit is open. You need to move now.", ja: "出口が開いています。今は移動が必要です。" },
+  "speak.noDecoys": { ko: "남은 소리 미끼가 없어요.", en: "You have no sound decoys left.", ja: "残りの音のおとりがありません。" },
+  "speak.soundOn": { ko: "소리를 켰어요.", en: "Sound turned on.", ja: "音をオンにしました。" },
+  "speak.dotpadConnected": { ko: "닷패드가 연결됐어요. F1부터 F4가 위, 아래, 왼쪽, 오른쪽이에요.", en: "Dot Pad connected. F1 through F4 are up, down, left, and right.", ja: "ドットパッドが接続されました。F1からF4が上・下・左・右です。" },
+  "speak.noBluetooth": { ko: "이 브라우저는 블루투스를 지원하지 않아요. 크롬이나 엣지에서 열어 주세요.", en: "This browser doesn't support Bluetooth. Please open this in Chrome or Edge.", ja: "このブラウザはBluetoothに対応していません。ChromeまたはEdgeで開いてください。" },
+  "speak.dotpadFailed": { ko: "닷패드 연결에 실패했어요.", en: "Failed to connect the Dot Pad.", ja: "ドットパッドの接続に失敗しました。" },
+  "speak.noneYet": { ko: "아직 안내가 없어요.", en: "No hint yet.", ja: "まだ案内がありません。" }
+};
+
+function t(key){
+  var e = I18N[key];
+  if (!e) return key;
+  return e[LANG] || e.ko || key;
+}
+function tf(key){
+  var s = t(key);
+  for (var i = 1; i < arguments.length; i++){ s = s.split("{" + (i - 1) + "}").join(String(arguments[i])); }
+  return s;
+}
+
+function applyI18n(){
+  document.querySelectorAll("[data-i18n]").forEach(function(el){
+    var k = el.getAttribute("data-i18n");
+    if (I18N[k]) el.textContent = t(k);
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(function(el){
+    var k = el.getAttribute("data-i18n-html");
+    if (I18N[k]) el.innerHTML = t(k);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach(function(el){
+    var k = el.getAttribute("data-i18n-aria");
+    if (I18N[k]) el.setAttribute("aria-label", t(k));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(function(el){
+    var k = el.getAttribute("data-i18n-title");
+    if (I18N[k]) el.setAttribute("title", t(k));
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach(function(el){
+    var k = el.getAttribute("data-i18n-ph");
+    if (I18N[k]) el.setAttribute("placeholder", t(k));
+  });
+  ["seg-lang-ko"].forEach(function(id){ var b = document.getElementById(id); if (b) b.classList.toggle("on", LANG === "ko"); });
+  ["seg-lang-en"].forEach(function(id){ var b = document.getElementById(id); if (b) b.classList.toggle("on", LANG === "en"); });
+  ["seg-lang-ja"].forEach(function(id){ var b = document.getElementById(id); if (b) b.classList.toggle("on", LANG === "ja"); });
+  try{ document.documentElement.lang = LANG; }catch(e){}
+  try{ document.title = t("title.name"); }catch(e){}
+}
+
+// 현재 화면(타이틀)에서 상태에 따라 다시 계산해 그려야 하는 동적 텍스트를 새 언어로 갱신
+function retranslateDynamic(){
+  try{ if (typeof updateModeGuide === "function") updateModeGuide(); }catch(e){}
+}
+
+window.setLang = function(l){
+  if (l !== "ko" && l !== "en" && l !== "ja") return;
+  LANG = l;
+  try{ localStorage.setItem("dotFootsteps.lang", l); }catch(e){}
+  ["seg-lang-ko", "seg-lang-en", "seg-lang-ja"].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.setAttribute("aria-pressed", (id === "seg-lang-" + l) ? "true" : "false");
+  });
+  try{
+    if (window.TW_TTS && typeof window.TW_TTS.setLang === "function" && (l === "ko" || l === "en")) window.TW_TTS.setLang(l);
+  }catch(e){}
+  applyI18n();
+  retranslateDynamic();
+};
+
+/* ============================================================
+   0-B. 상수 / 순수 유틸
    ============================================================ */
 var COLS = 6, ROWS = 5;           // 논리 타일 그리드
 var PIN_W = 60, PIN_H = 40;       // 닷패드 물리 핀 해상도
@@ -1064,7 +1388,7 @@ function speakBrowser(text){
     if ("speechSynthesis" in window){
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(text);
-      u.lang = "ko-KR";
+      u.lang = TTS_LANG_TAG[LANG] || "ko-KR";
       window.speechSynthesis.speak(u);
     }
   }catch(e){}
@@ -1076,7 +1400,8 @@ function speak(text, opts){
   if (captionTextEl) captionTextEl.textContent = text;
   if (opts.assertive && liveAlertEl) liveAlertEl.textContent = text;
   if (!soundOn) return; // 자막은 남기고 소리만 끔
-  if (USE_BROWSER_VOICE){ speakBrowser(text); return; }
+  // 공유 tts.js(TW_TTS)는 ko/en 음성만 지원 — 일본어는 항상 브라우저 음성으로 직행
+  if (USE_BROWSER_VOICE || LANG === "ja"){ speakBrowser(text); return; }
   try{
     if (window.TW_TTS && typeof window.TW_TTS.speak === "function"){
       window.TW_TTS.speak(text);
@@ -1085,7 +1410,7 @@ function speak(text, opts){
   }catch(e){}
   speakBrowser(text);
 }
-function repeatLast(){ speak(lastSpoken || "아직 안내가 없어요."); }
+function repeatLast(){ speak(lastSpoken || t("speak.noneYet")); }
 
 /* ============================================================
    4. 오디오 엔진 — 전부 WebAudio 합성음 (외부 파일 의존 없음)
@@ -1425,18 +1750,18 @@ var state = {
 var selectedRounds = 10;
 
 function modeFeatures(rounds){
-  if (rounds === 0) return { bushes:false, resonance:false, decoy:false, exit:false, label:"연습" };
-  if (rounds === 5) return { bushes:true, resonance:true, decoy:false, exit:false, label:"기본" };
-  return { bushes:true, resonance:true, decoy:true, exit:true, label:"전체" };
+  if (rounds === 0) return { bushes:false, resonance:false, decoy:false, exit:false, mode:"practice" };
+  if (rounds === 5) return { bushes:true, resonance:true, decoy:false, exit:false, mode:"basic" };
+  return { bushes:true, resonance:true, decoy:true, exit:true, mode:"full" };
 }
 
 function updateModeGuide(){
   var f = modeFeatures(selectedRounds);
   var el = document.getElementById("mode-guide");
   if (!el) return;
-  if (f.label === "연습") el.textContent = "연습: 이동, 집중해서 듣기, X자 점형만 익혀요. 시간 제한은 없어요.";
-  else if (f.label === "기본") el.textContent = "기본 5라운드: 덤불과 잔향까지 익혀요. 미끼와 탈출은 아직 나오지 않아요.";
-  else el.textContent = selectedRounds + "라운드: 덤불·소리 미끼·탈출까지 모두 사용해요.";
+  if (f.mode === "practice") el.textContent = t("guide.practice");
+  else if (f.mode === "basic") el.textContent = t("guide.basic");
+  else el.textContent = tf("guide.full", selectedRounds);
   updateModeDetails(f);
 }
 
@@ -1453,14 +1778,14 @@ function updateModeDetails(f){
   rulesMore.hidden = !f.resonance && !f.bushes && !f.decoy;
   rulesMore.open = false;
   rulesMore.querySelector("ol").start = f.exit ? 5 : 4;
-  if (f.label === "연습"){
-    titleSub.textContent = "몬스터와 거리를 두고, X자 점형으로 마지막 발소리를 확인하세요.";
-  } else if (f.label === "기본"){
-    titleSub.textContent = "발소리를 기억하고, 덤불을 이용해 몬스터를 따돌리세요.";
-    rulesMoreSummary.textContent = "고급 규칙 보기 — 반복 듣기 · 덤불";
+  if (f.mode === "practice"){
+    titleSub.textContent = t("titleSub.practice");
+  } else if (f.mode === "basic"){
+    titleSub.textContent = t("titleSub.basic");
+    rulesMoreSummary.textContent = t("rulesMore.basic");
   } else {
-    titleSub.textContent = "발소리의 마지막 위치를 기억하고, 소리를 흘려 몬스터를 따돌린 뒤 탈출하세요.";
-    rulesMoreSummary.textContent = "고급 규칙 보기 — 반복 듣기 · 덤불 · 미끼";
+    titleSub.textContent = t("titleSub.full");
+    rulesMoreSummary.textContent = t("rulesMore.full");
   }
 }
 
@@ -1531,52 +1856,52 @@ function tryMove(dir){
 }
 
 function distanceLabel(distance){
-  if (distance <= 1) return "바로 옆";
-  if (distance <= 3) return "가까움";
-  return "멀리";
+  if (distance <= 1) return t("dist.near");
+  if (distance <= 3) return t("dist.mid");
+  return t("dist.far");
 }
 
 function relativePosition(from, to){
-  if (!to) return "아직 확인되지 않음";
+  if (!to) return t("pos.unknown");
   var parts = [];
   var dr = to.row - from.row;
   var dc = to.col - from.col;
-  if (dr < 0) parts.push("위쪽 " + Math.abs(dr) + "칸");
-  if (dr > 0) parts.push("아래쪽 " + dr + "칸");
-  if (dc < 0) parts.push("왼쪽 " + Math.abs(dc) + "칸");
-  if (dc > 0) parts.push("오른쪽 " + dc + "칸");
-  return parts.length ? parts.join(", ") : "현재 나와 같은 칸";
+  if (dr < 0) parts.push(tf("pos.up", Math.abs(dr)));
+  if (dr > 0) parts.push(tf("pos.down", dr));
+  if (dc < 0) parts.push(tf("pos.left", Math.abs(dc)));
+  if (dc > 0) parts.push(tf("pos.right", dc));
+  return parts.length ? parts.join(t("pos.joiner")) : t("pos.same");
 }
 
 function directionOnly(from, to){
-  if (!to) return "알 수 없는 방향";
+  if (!to) return t("dir.unknown");
   var dr = to.row - from.row;
   var dc = to.col - from.col;
   var parts = [];
-  if (dr < 0) parts.push("위쪽");
-  if (dr > 0) parts.push("아래쪽");
-  if (dc < 0) parts.push("왼쪽");
-  if (dc > 0) parts.push("오른쪽");
-  return parts.length ? parts.join("과 ") : "바로 이곳";
+  if (dr < 0) parts.push(t("dir.up"));
+  if (dr > 0) parts.push(t("dir.down"));
+  if (dc < 0) parts.push(t("dir.left"));
+  if (dc > 0) parts.push(t("dir.right"));
+  return parts.length ? parts.join(t("dir.joiner")) : t("dir.same");
 }
 
-function gridPosition(t){
-  return "위에서 " + (t.row + 1) + "번째 행, 왼쪽에서 " + (t.col + 1) + "번째 열";
+function gridPosition(t2){
+  return tf("grid.position", t2.row + 1, t2.col + 1);
 }
 
 function describeTactileMap(){
-  var parts = ["촉각 지도. 내 위치 " + gridPosition(state.player) + "."];
+  var parts = [tf("map.intro", gridPosition(state.player))];
   if (state.bushes.length){
-    parts.push("덤불 " + state.bushes.map(gridPosition).join("; ") + ".");
+    parts.push(tf("map.bushes", state.bushes.map(gridPosition).join("; ")));
   }
   if (state.lastHeard){
-    parts.push("마지막 발소리 X자 점형은 내 위치에서 " + relativePosition(state.player, state.lastHeard) + ".");
+    parts.push(tf("map.lastHeard", relativePosition(state.player, state.lastHeard)));
   }
   if (state.lastDecoy && state.alertTimer > 0){
-    parts.push("소리 미끼 네 점은 내 위치에서 " + relativePosition(state.player, state.lastDecoy) + ".");
+    parts.push(tf("map.decoy", relativePosition(state.player, state.lastDecoy)));
   }
   if (state.exitActive && state.exit){
-    parts.push("탈출구 이중 테두리는 내 위치에서 " + relativePosition(state.player, state.exit) + ".");
+    parts.push(tf("map.exit", relativePosition(state.player, state.exit)));
   }
   return parts.join(" ");
 }
@@ -1588,21 +1913,21 @@ function updateNarrative(action){
   var line, urgent = false;
 
   if (state.exitActive){
-    line = "탈출구가 열렸어요. 내 위치에서 " + relativePosition(state.player, state.exit) + "에 있는 이중 테두리 점형으로 이동하세요. 남은 시간 " + state.escapeTurns + "턴.";
+    line = tf("narrate.exitActive", relativePosition(state.player, state.exit), state.escapeTurns);
     urgent = state.escapeTurns <= 1;
   } else if (action === "decoy"){
-    line = "소리 미끼를 내 위치에서 " + relativePosition(state.player, state.lastDecoy) + "에 던졌어요. 네 점 점형으로 표시되며 몬스터가 2턴 동안 따라가요.";
+    line = tf("narrate.decoyThrown", relativePosition(state.player, state.lastDecoy));
   } else if (action === "move" && onBush){
-    line = "덤불 속으로 이동했어요. 잔향이 흡수돼 위치 포착을 피할 수 있지만 정확한 발소리 칸은 알 수 없어요.";
+    line = t("narrate.moveBush");
   } else if (action === "move"){
-    line = "발소리 흔적을 남겼어요. 몬스터가 2턴 동안 그 칸을 추적해요." + (state.lastHeard ? " 마지막 발소리 X자는 현재 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "에 있어요." : "");
+    line = t("narrate.moveBase") + (state.lastHeard ? tf("narrate.moveLastHeardSuffix", relativePosition(state.player, state.lastHeard)) : "");
   } else if (onBush){
-    line = "덤불 때문에 정확한 칸은 알 수 없어요. " + directionOnly(state.player, state.monster) + "에서 " + distanceLabel(newDist) + " 발소리가 들려요.";
+    line = tf("narrate.bushListen", directionOnly(state.player, state.monster), distanceLabel(newDist));
   } else if (state.features.resonance && state.resonance >= 3){
-    line = "진동 포착! 이 자리에 잔향이 쌓였어요. 몬스터가 내 위치를 향해 와요—지금 이동하세요.";
+    line = t("narrate.resonanceTrigger");
     urgent = true;
   } else {
-    line = "집중 완료. 마지막 발소리 X자는 내 위치에서 " + relativePosition(state.player, state.lastHeard) + "이고, 현재 추정 거리는 " + distanceLabel(newDist) + "예요." + (state.features.resonance ? " 잔향 " + state.resonance + "/3." : "");
+    line = tf("narrate.listenDone", relativePosition(state.player, state.lastHeard), distanceLabel(newDist)) + (state.features.resonance ? tf("narrate.resonanceSuffix", state.resonance) : "");
     if (newDist <= 1){
       urgent = true;
     }
@@ -1611,7 +1936,7 @@ function updateNarrative(action){
   // 라운드 진행을 5라운드마다 짚어줌(끝 라운드는 종료 안내가 바로 이어지므로 생략해 겹치지 않게 함)
   var isFinalRound = state.roundsTotal > 0 && state.round >= state.roundsTotal;
   if (state.round > 0 && state.round % 5 === 0 && !isFinalRound){
-    line = state.round + "라운드째예요. " + line;
+    line = tf("narrate.roundMarker", state.round) + line;
   }
 
   speak(line, { assertive: urgent });
@@ -1659,11 +1984,11 @@ var overlayPause, overlayResults, overlayTutorial, resultTitleEl, resultSubEl, r
 var tileEls = [];
 var tutorialIndex = 0;
 var tutorialSteps = [
-  { kind:"player", title:"내 위치", text:"중앙의 작은 채움 블록입니다. 손끝으로 작은 사각형을 확인하세요.", className:"is-player" },
-  { kind:"sound", title:"마지막 발소리", text:"X자 점형입니다. 몬스터의 현재 위치가 아니라 마지막으로 들은 위치이며 다음 듣기까지 유지됩니다.", className:"is-last-heard" },
-  { kind:"bush", title:"덤불", text:"속이 빈 단일 테두리입니다. 발소리 잔향을 흡수하지만 정확한 발소리 칸은 들리지 않습니다.", className:"is-bush" },
-  { kind:"exit", title:"탈출구", text:"안과 밖에 선이 있는 이중 테두리입니다. 탈출 단계에서 이 점형으로 이동하세요.", className:"is-exit" },
-  { kind:"decoy", title:"소리 미끼", text:"서로 떨어진 네 점입니다. 한 판에 두 번 몬스터를 다른 곳으로 유인할 수 있습니다.", className:"is-decoy" }
+  { kind:"player", titleKey:"tutorial.player.title", textKey:"tutorial.player.text", className:"is-player" },
+  { kind:"sound", titleKey:"tutorial.sound.title", textKey:"tutorial.sound.text", className:"is-last-heard" },
+  { kind:"bush", titleKey:"tutorial.bush.title", textKey:"tutorial.bush.text", className:"is-bush" },
+  { kind:"exit", titleKey:"tutorial.exit.title", textKey:"tutorial.exit.text", className:"is-exit" },
+  { kind:"decoy", titleKey:"tutorial.decoy.title", textKey:"tutorial.decoy.text", className:"is-decoy" }
 ];
 
 var lastFocusedBeforeDialog = null;
@@ -1753,7 +2078,7 @@ function render(){
   document.getElementById("legend-bush").hidden = !state.features.bushes;
   document.getElementById("legend-exit").hidden = !state.features.exit;
   document.getElementById("legend-decoy").hidden = !state.features.decoy;
-  document.querySelector(".tension-track").setAttribute("aria-label", "위험도, 몬스터 추정 거리 " + distanceLabel(distance));
+  document.querySelector(".tension-track").setAttribute("aria-label", tf("hud.tensionAriaDynamic", distanceLabel(distance)));
   document.getElementById("tactile-preview").setAttribute("aria-label", describeTactileMap());
   try{ renderTactilePreview(); }catch(e){}
   try{ pushTactile(); }catch(e){}
@@ -1761,18 +2086,18 @@ function render(){
 }
 
 function showResults(caught, survived, best, cause){
-  var isBasicComplete = !caught && state.features && state.features.label === "기본";
-  resultTitleEl.textContent = caught ? "들켰어요…" : (isBasicComplete ? "기본 훈련 완료!" : (state.roundsTotal > 0 ? "새벽이 밝았어요" : "정말 오래 버텼어요"));
+  var isBasicComplete = !caught && state.features && state.features.mode === "basic";
+  resultTitleEl.textContent = caught ? t("result.title.caught") : (isBasicComplete ? t("result.title.basicDone") : (state.roundsTotal > 0 ? t("result.title.dawn") : t("result.title.endless")));
   var causeText = {
-    chase: "떠난 칸의 소리를 추적한 몬스터와 같은 칸에서 마주쳤어요.",
-    resonance: "같은 자리에서 반복해 들은 진동을 몬스터가 포착했어요.",
-    contact: "이동한 칸에서 몬스터와 마주쳤어요.",
-    timeout: "탈출구가 닫히기 전에 도착하지 못했어요."
+    chase: t("cause.chase"),
+    resonance: t("cause.resonance"),
+    contact: t("cause.contact"),
+    timeout: t("cause.timeout")
   }[cause];
   var replay = state.history.slice(-2).join(" → ");
   resultSubEl.textContent = caught
-    ? (causeText || "몬스터와 같은 칸에서 마주쳤어요.") + (replay ? " 마지막 행동: " + replay : "")
-    : (isBasicComplete ? survived + "라운드를 버텼어요. 덤불과 잔향을 익혔어요." : "탈출구에 도착했어요. 마지막 위치를 기억하고 추적을 따돌렸습니다.");
+    ? (causeText || t("cause.fallback")) + (replay ? tf("result.lastActions", replay) : "")
+    : (isBasicComplete ? tf("result.basicSub", survived) : t("result.escapeSub"));
   resultRoundsEl.textContent = survived;
   resultBestEl.textContent = best;
   openDialog(overlayResults);
@@ -1783,13 +2108,13 @@ function showResults(caught, survived, best, cause){
    ============================================================ */
 function speakRules(){
   var f = state.screen === "game" && state.features ? state.features : modeFeatures(selectedRounds);
-  var line = "한 번 행동하면 몬스터도 한 칸 움직여요. 이동하면 떠난 칸에 발소리 흔적이 남아 몬스터가 두 턴 동안 그 칸을 추적해요. 집중해서 들으면 X자 점형과 방향, 칸 수로 마지막 발소리 위치를 알 수 있어요. 몬스터와 같은 칸에서 만나면 잡혀요.";
-  if (f.resonance) line += " 같은 자리에서 세 번 들으면 잔향이 쌓여 몬스터가 내 위치를 포착해요.";
-  if (f.bushes) line += " 덤불은 단일 테두리 점형이며 잔향을 흡수하지만 정확한 발소리 칸은 들을 수 없어요.";
-  if (f.decoy) line += " 소리 미끼는 네 점 점형이고 두 번 사용할 수 있어요.";
-  if (f.exit) line += " 선택한 라운드까지 살아남으면 이중 테두리 탈출구가 열리고, 세 턴 안에 도착해야 해요.";
-  else if (f.label === "기본") line += " 다섯 라운드를 버티면 기본 게임을 마쳐요.";
-  else line += " 연습은 시간 제한이 없어요.";
+  var line = t("rules.base");
+  if (f.resonance) line += t("rules.resonance");
+  if (f.bushes) line += t("rules.bushes");
+  if (f.decoy) line += t("rules.decoy");
+  if (f.exit) line += t("rules.exit");
+  else if (f.mode === "basic") line += t("rules.basicEnd");
+  else line += t("rules.practiceEnd");
   speak(line);
 }
 
@@ -1826,24 +2151,24 @@ function endGame(caught, cause){
   if (isNewBest) setBest(key, survived);
 
   var causeSpoken = {
-    chase: "떠난 칸의 소리를 추적한 몬스터와 마주쳤어요.",
-    resonance: "반복해서 들은 진동을 몬스터가 포착했어요.",
-    contact: "이동한 칸에서 몬스터와 마주쳤어요.",
-    timeout: "탈출구가 닫혔어요."
+    chase: t("causeSpoken.chase"),
+    resonance: t("causeSpoken.resonance"),
+    contact: t("causeSpoken.contact"),
+    timeout: t("causeSpoken.timeout")
   }[cause];
 
   var line;
   if (caught){
     AudioEngine.sting("caught");
-    line = "들켰어요… " + (causeSpoken || "") + " " + survived + "라운드 버텼어요.";
-  } else if (state.features && state.features.label === "기본") {
+    line = tf("speak.caught", causeSpoken || "", survived);
+  } else if (state.features && state.features.mode === "basic") {
     AudioEngine.sting("dawn");
-    line = "기본 훈련 완료! " + survived + "라운드를 버텼어요. 덤불과 잔향을 익혔어요.";
+    line = tf("speak.basicDone", survived);
   } else {
     AudioEngine.sting("dawn");
-    line = (state.roundsTotal > 0 ? "새벽이 밝았어요. 살았어요! " : "정말 오래 버텼어요! ") + survived + "라운드를 버텼어요.";
+    line = state.roundsTotal > 0 ? tf("speak.dawn", survived) : tf("speak.endless", survived);
   }
-  line += isNewBest ? " 최고 기록이에요!" : (" 최고 기록은 " + best + "라운드예요.");
+  line += isNewBest ? t("speak.newBest") : tf("speak.bestIs", best);
   speak(line, { assertive: true });
 
   DotPad.pulse(caught ? 2 : 3);
@@ -1881,26 +2206,27 @@ function startGame(roundsTotal){
   overlayPause.hidden = true;
   overlayResults.hidden = true;
   showScreen("screen-game");
-  hudRoundTotalEl.textContent = roundsTotal > 0 ? ("/" + roundsTotal) : " · 연습";
+  hudRoundTotalEl.textContent = roundsTotal > 0 ? ("/" + roundsTotal) : t("hud.practiceSuffix");
   hudBestEl.textContent = getBest(bestKey());
 
   AudioEngine.resume();
   AudioEngine.setHeartbeat(currentFear(), !!bushAt(state.player));
-  speak("게임을 시작해요. " + (state.features.label === "연습" ? "연습에서는 이동하고, 집중해서 들어 X자 점형을 확인하세요. " : "") + "한 번 행동하면 몬스터도 한 칸 움직여요. 내 위치는 중앙의 작은 채움 블록이고, 마지막 발소리는 다음 듣기까지 유지되는 X자 점형이에요.");
+  speak(tf("speak.gameStart", state.features.mode === "practice" ? t("speak.gameStartPractice") : ""));
   render();
 }
 
 function renderTutorial(){
   var steps = getTutorialSteps();
   var step = steps[tutorialIndex];
+  var stepTitle = t(step.titleKey), stepText = t(step.textKey);
   document.getElementById("tutorial-step").textContent = (tutorialIndex + 1) + " / " + steps.length;
-  document.getElementById("tutorial-title").textContent = step.title;
-  document.getElementById("tutorial-sub").textContent = step.text;
+  document.getElementById("tutorial-title").textContent = stepTitle;
+  document.getElementById("tutorial-sub").textContent = stepText;
   document.getElementById("tutorial-pattern").className = "tile " + step.className;
   document.getElementById("btn-tutorial-prev").disabled = tutorialIndex === 0;
-  document.getElementById("btn-tutorial-next").textContent = tutorialIndex === steps.length - 1 ? "처음부터" : "다음";
+  document.getElementById("btn-tutorial-next").textContent = tutorialIndex === steps.length - 1 ? t("tutorial.restart") : t("tutorial.next");
   DotPad.render(encodePins(buildTutorialBitmap(step.kind)));
-  speak(step.title + ". " + step.text);
+  speak(stepTitle + ". " + stepText);
 }
 
 function getTutorialSteps(){
@@ -1936,7 +2262,7 @@ function chooseExit(){
 }
 
 function deployDecoy(){
-  if (state.decoys <= 0){ speak("남은 소리 미끼가 없어요."); return false; }
+  if (state.decoys <= 0){ speak(t("speak.noDecoys")); return false; }
   var candidates = [];
   for (var r = 0; r < ROWS; r++){
     for (var c = 0; c < COLS; c++){
@@ -1965,19 +2291,19 @@ Game.dispatch = function(action, dir){
   var wasChasing = state.alertTimer > 0;
   if (action === "move"){
     var res = tryMove(dir);
-    if (!res.ok){ AudioEngine.sting("denied"); speak("그쪽엔 더 갈 곳이 없어요."); return; }
-    actionLabel = "이동";
+    if (!res.ok){ AudioEngine.sting("denied"); speak(t("speak.blocked")); return; }
+    actionLabel = t("action.move");
     AudioEngine.playerStep();
   } else if (action === "stay" || action === "listen"){
     action = "listen";
-    actionLabel = "듣기";
+    actionLabel = t("action.listen");
     state.stayStreak++;
     if (state.features.resonance) state.resonance = Math.min(3, state.resonance + 1);
     state.lastHeard = bushAt(state.player) ? null : { row:state.monster.row, col:state.monster.col };
   } else if (action === "decoy"){
-    if (state.exitActive){ speak("탈출구가 열렸어요. 지금은 이동해야 해요."); return; }
+    if (state.exitActive){ speak(t("speak.decoyDuringExit")); return; }
     if (!deployDecoy()) return;
-    actionLabel = "미끼";
+    actionLabel = t("action.decoy");
   } else { return; }
 
   state.history.push(actionLabel);
@@ -2036,7 +2362,7 @@ function updateSoundUI(){
     if (!b) return;
     b.innerHTML = soundOn ? SVG_VOL : SVG_VOL_OFF;
     b.setAttribute("aria-pressed", String(soundOn));
-    b.setAttribute("aria-label", soundOn ? "음성 켜짐, 누르면 끔" : "음성 꺼짐, 누르면 켬");
+    b.setAttribute("aria-label", soundOn ? t("sound.onAria") : t("sound.offAria"));
   });
 }
 
@@ -2044,7 +2370,7 @@ function toggleSound(){
   soundOn = !soundOn;
   updateSoundUI();
   AudioEngine.setEnabled(soundOn);
-  if (soundOn){ speak("소리를 켰어요."); }
+  if (soundOn){ speak(t("speak.soundOn")); }
   else if (window.TW_TTS){ try{ TW_TTS.stop(); }catch(e){} }
 }
 
@@ -2077,12 +2403,12 @@ function drawPin(){
 function updateDotPadUI(connected){
   var labels = document.querySelectorAll(".dp-label");
   for (var i = 0; i < labels.length; i++){
-    labels[i].textContent = connected ? "닷패드 연결됨" : "닷패드 연결";
+    labels[i].textContent = connected ? t("dp.connected") : t("dp.connect");
   }
   var btns = [document.getElementById("btn-dotpad-title"), document.getElementById("btn-dotpad-game")];
   btns.forEach(function(b){ if (b) b.setAttribute("aria-pressed", connected ? "true" : "false"); });
   if (connected){
-    speak("닷패드가 연결됐어요. F1부터 F4가 위, 아래, 왼쪽, 오른쪽이에요.");
+    speak(t("speak.dotpadConnected"));
   }
 }
 
@@ -2090,17 +2416,18 @@ async function handleConnectDotPad(){
   AudioEngine.resume();
   var res = await DotPad.requestConnect();
   if (!res.ok && res.reason === "no-bluetooth"){
-    speak("이 브라우저는 블루투스를 지원하지 않아요. 크롬이나 엣지에서 열어 주세요.");
+    speak(t("speak.noBluetooth"));
   } else if (!res.ok && res.reason !== "cancelled"){
-    speak("닷패드 연결에 실패했어요.");
+    speak(t("speak.dotpadFailed"));
   }
 }
 
 function init(){
   if (isEmbed) document.body.classList.add("embed");
+  applyI18n();
   if (window.TW_TTS){
     try{
-      TW_TTS.setLang("ko");
+      if (LANG === "ko" || LANG === "en") TW_TTS.setLang(LANG);
       // 정적 배포(github.io 등)엔 서버 음성(/api/tts)이 없고, tts.js는 iframe 안에서 브라우저 폴백을
       // 기본적으로 막아버림 — 그대로 두면 "TW_TTS는 있는데 소리는 전혀 안 나는" 무음 실패가 생김.
       // 지뢰찾기(dot-minesweeper)와 동일하게 폴백을 명시적으로 허용하고, github.io에선 서버 시도 자체를 건너뜀.
